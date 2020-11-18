@@ -5,7 +5,7 @@
     font-family: -apple-system,BlinkMacSystemFont,avenir next,avenir,helvetica neue,helvetica,ubuntu,roboto,noto,segoe ui,arial,sans-serif;
     overflow: hidden;
   }
-  
+
   .modal__overlay {
     position: fixed;
     top: 0;
@@ -16,8 +16,9 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    outline: none;
   }
-  
+
   .modal__container {
     background-color: #fff;
     padding: 30px;
@@ -27,7 +28,7 @@
     overflow-y: auto;
     box-sizing: border-box;
   }
-  
+
   .modal__header {
     display: flex;
     justify-content: space-between;
@@ -37,7 +38,7 @@
   .modal__footer {
     text-align: right;
   }
-  
+
   .modal__title {
     margin-top: 0;
     margin-bottom: 0;
@@ -47,21 +48,21 @@
     color: #d9534f;
     box-sizing: border-box;
   }
-  
+
   .modal__close {
     background: transparent;
     border: 0;
   }
-  
+
   .modal__header .modal__close:before { content: "\2715"; color: #333}
-  
+
   .modal__content {
     margin-top: 2rem;
     margin-bottom: 2rem;
     line-height: 1.5;
     color: rgba(0,0,0,.8);
   }
-  
+
   .modal__btn {
     font-size: 1rem;
     padding: 1rem 2rem;
@@ -86,19 +87,19 @@
     transition: transform .25s ease-out;
     transition: transform .25s ease-out,-webkit-transform .25s ease-out;
   }
-  
+
   .modal__btn:focus, .modal__btn:hover {
     -webkit-transform: scale(1.05);
     transform: scale(1.05);
   }
-  
+
   .modal__btn-primary {
     background-color: #00449e;
     color: #fff;
   }
-  
-  
-  
+
+
+
   /**************************\
     Animation Style
   \**************************/
@@ -106,46 +107,46 @@
       from { opacity: 0; }
         to { opacity: 1; }
   }
-  
+
   @keyframes mmfadeOut {
       from { opacity: 1; }
         to { opacity: 0; }
   }
-  
+
   @keyframes mmslideIn {
     from { transform: translateY(15%); }
       to { transform: translateY(0); }
   }
-  
+
   @keyframes mmslideOut {
       from { transform: translateY(0); }
       to { transform: translateY(-10%); }
   }
-  
+
   .micromodal-slide {
     display: none;
   }
-  
+
   .micromodal-slide.is-open {
     display: block;
   }
-  
+
   .micromodal-slide[aria-hidden="false"] .modal__overlay {
     animation: mmfadeIn .3s cubic-bezier(0.0, 0.0, 0.2, 1);
   }
-  
+
   .micromodal-slide[aria-hidden="false"] .modal__container {
     animation: mmslideIn .3s cubic-bezier(0, 0, .2, 1);
   }
-  
+
   .micromodal-slide[aria-hidden="true"] .modal__overlay {
     animation: mmfadeOut .3s cubic-bezier(0.0, 0.0, 0.2, 1);
   }
-  
+
   .micromodal-slide[aria-hidden="true"] .modal__container {
     animation: mmslideOut .3s cubic-bezier(0, 0, .2, 1);
   }
-  
+
   .micromodal-slide .modal__container,
   .micromodal-slide .modal__overlay {
     will-change: transform;

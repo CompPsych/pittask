@@ -120,7 +120,7 @@ jsPsych.plugins['survey-vvr-questions-right'] = (function() {
 
     new_html +=
       `<div class="modal micromodal-slide" id="modal-3" aria-hidden="true">
-        <div class="modal__overlay" tabindex="-1" data-micromodal-close>
+        <div class="modal__overlay" tabindex="-1">
           <div class="modal__container" role="dialog" aria-modal="true" aria-labelledby="modal-1-title">
             <header class="modal__header">
               <button class="modal__close" aria-label="Close modal" data-micromodal-close></button>
