@@ -140,7 +140,7 @@ window.jsPsych = (function() {
     opts.display_element.innerHTML = '<div class="jspsych-content-wrapper"><div id="jspsych-content"></div></div>';
     DOM_container = opts.display_element;
     DOM_target = document.querySelector('#jspsych-content');
-    
+
 
     // add tabIndex attribute to scope event listeners
     opts.display_element.tabIndex = 0;
@@ -577,7 +577,7 @@ window.jsPsych = (function() {
         // if progress.current_location is -1, then the timeline variable is being evaluated
         // in a function that runs prior to the trial starting, so we should treat that trial
         // as being the active trial for purposes of finding the value of the timeline variable
-        var loc = Math.max(0, progress.current_location); 
+        var loc = Math.max(0, progress.current_location);
         return timeline_parameters.timeline[loc].timelineVariable(variable_name);
       }
     }
@@ -935,7 +935,7 @@ window.jsPsych = (function() {
             }
           }
         }
-      }      
+      }
       // if it's not nested, checking is much easier and do that here:
       else if(typeof trial[param] == 'undefined' || trial[param] === null){
         if(typeof jsPsych.plugins[trial.type].info.parameters[param].default == 'undefined'){
@@ -1001,7 +1001,7 @@ window.jsPsych = (function() {
     document.querySelector('.jspsych-display-element').insertAdjacentHTML('afterbegin',
       '<div id="jspsych-progressbar-container">'+
       '<span>'+
-      msg+ 
+      msg+
       '</span>'+
       '<div id="jspsych-progressbar-outer">'+
         '<div id="jspsych-progressbar-inner"></div>'+
@@ -1839,7 +1839,7 @@ jsPsych.randomization = (function() {
     if(!Array.isArray(arr)){
       console.error("First argument to jsPsych.randomization.sampleWithoutReplacement() must be an array")
     }
-    
+
     if (size > arr.length) {
       console.error("Cannot take a sample " +
         "larger than the size of the set of items to sample.");
@@ -2021,7 +2021,7 @@ jsPsych.pluginAPI = (function() {
     }
 
     var listener_id;
-    
+
     var listener_function = function(e) {
 
       var key_time;
@@ -2092,7 +2092,7 @@ jsPsych.pluginAPI = (function() {
           }
         };
 
-        $(document).keyup(after_up);        
+        $(document).keyup(after_up);
 
       }
     };
@@ -2571,7 +2571,7 @@ jsPsych.pluginAPI = (function() {
 
   };
 
-    module.preloadVideo = function(video, callback_complete, callback_load) {
+  module.preloadVideo = function(video, callback_complete, callback_load) {
 
         // flatten the images array
         video = jsPsych.utils.flatten(video);
@@ -2676,7 +2676,7 @@ jsPsych.pluginAPI = (function() {
     images = images.filter(function(x) { return x != false && x != null})
     audio = audio.filter(function(x) { return x != false && x != null})
     video = video.filter(function(x) { return x != false && x != null})
-    
+
     var total_n = images.length + audio.length + video.length;
 
     var loaded = 0;
@@ -2725,14 +2725,291 @@ jsPsych.pluginAPI = (function() {
   /** {boolean} Indicates whether this instance of jspsych has opened a hardware connection through our browser extension */
   module.hardwareConnected = false;
 
-
   //it might be useful to open up a line of communication from the extension back to this page script,
   //again, this will have to pass through DOM events. For now speed is of no concern so I will use jQuery
   document.addEventListener("jspsych-activate", function(evt){
 	  module.hardwareConnected = true;
   })
 
+  /**
+   * Get params by name of test.
+   *
+   * @param {String} testName
+   *
+   * @return {Object}
+   */
+  function getTimerModuleParamsByTestName(testName) {
+    var params = {
+      textFloor: answer_latency_text_floor,
+      textCeiling: answer_latency_text_ceiling,
+      popupFloor: popup_answer_latency_floor_SI,
+      popupCeiling: popup_answer_latency_ceiling_SI,
+      timeFloor: answer_latency_floor_SI,
+      timeCeiling: answer_latency_ceiling_SI,
+    };
 
+    switch (testName) {
+      case 'ICAR':
+        params.popupFloor = popup_answer_latency_floor_ICAR;
+        params.popupCeiling = popup_answer_latency_ceiling_ICAR;
+        params.timeFloor = answer_latency_floor_ICAR;
+        params.timeCeiling = answer_latency_ceiling_ICAR;
+        break;
+      case 'SDS':
+        params.popupFloor = popup_answer_latency_floor_SDS;
+        params.popupCeiling = popup_answer_latency_ceiling_SDS;
+        params.timeFloor = answer_latency_floor_SDS;
+        params.timeCeiling = answer_latency_ceiling_SDS;
+        break;
+      default:
+        break;
+    }
+
+    return params;
+  }
+
+  /**
+   * Timer Module Factory.
+   *
+   * @param {Object} responseStore - Store.
+   * @param {Number} timestamp - Timestamp.
+   * @param {Boolean} isOnFloor - Switch floor popup.
+   * @param {Boolean} isOnCeil - Switch ceil popup.
+   *
+   * @return {Object} timer module.
+   */
+  module.timerModuleFactory = function(responseStore, timestamp, isOnFloor, isOnCeil) {
+    var firstTime = 0;
+    var tmpAnswerTime = 0;
+    var ceilingTime = 0;
+    var wasFirstClick = false;
+    var popupText = '';
+    var popupFloorText = '';
+    var popupCeilingText = '';
+    var minAnswerTime = 4000;
+    var maxAnswerTime = 10000;
+    var ceilingTimer = null;
+    var timer = null;
+    var openEventName = ''
+    var microModalConfig = {
+      onShow: function() {
+        var text = 'popup triggered by' + openEventName + 'a floor threshold value...';
+
+        responseStore.trial_events.push({
+          'event_type': 'error message',
+          'event_raw_details': 'Error message',
+          'event_converted_details': text,
+          'timestamp': jsPsych.totalTime(),
+          'time_elapsed': jsPsych.totalTime() - timestamp
+        });
+      },
+      onClose: function() {
+        if (isOnFloor) {
+          restartFloorTimer();
+        }
+
+        if (isOnCeil) {
+          restartCeilingTimer();
+        }
+
+        responseStore.trial_events.push({
+          'event_type': 'popup closed',
+          'event_raw_details': 'Close',
+          'event_converted_details': '',
+          'timestamp': jsPsych.totalTime(),
+          'time_elapsed': jsPsych.totalTime() - timestamp
+        });
+      },
+    };
+
+    if (isOnFloor) {
+      startFloorTimer();
+    }
+
+    if (isOnCeil) {
+      startCeilingTimer();
+    }
+
+    function startFloorTimer() {
+      timer = setInterval(function() {
+        tmpAnswerTime += 10;
+      }, 10);
+    }
+
+    function startCeilingTimer() {
+      ceilingTimer = setInterval(function() {
+        ceilingTime += 10;
+
+        if (ceilingTime >= maxAnswerTime) {
+          setOpenPopupEventText('ceiling');
+          setPopupText(popupCeilingText);
+          showPopup();
+          stopTimer(ceilingTimer);
+        }
+      }, 10);
+    }
+
+    function stopTimer(timer) {
+      clearInterval(timer);
+    }
+
+    function restartFloorTimer() {
+      tmpAnswerTime = 0;
+      clearInterval(timer);
+
+      startFloorTimer();
+      openEventName = '';
+    }
+
+    function restartCeilingTimer() {
+      ceilingTime = 0;
+      clearInterval(ceilingTimer);
+      startCeilingTimer();
+      openEventName = '';
+    }
+
+    function showPopup() {
+      MicroModal.show('modal-2', microModalConfig);
+    }
+
+    function setPopupText(value) {
+      popupText = value;
+      window.document.getElementById('modal-2-content__text').innerText = value;
+    }
+
+    function setOpenPopupEventText(value) {
+      openEventName = value;
+    }
+
+    return {
+      getFirstTime: function() {
+        return firstTime;
+      },
+      check: function() {
+        if (!wasFirstClick) {
+          wasFirstClick = true;
+          firstTime = tmpAnswerTime;
+        }
+
+        if (isOnFloor !== true) {
+
+          if (isOnCeil) {
+            restartCeilingTimer();
+          }
+
+          return true
+        }
+
+        if (tmpAnswerTime < minAnswerTime) {
+          setOpenPopupEventText('floor');
+          setPopupText(popupFloorText);
+          showPopup();
+          stopTimer(timer);
+          stopTimer(ceilingTimer);
+
+          return false;
+        }
+
+        restartFloorTimer();
+
+        if (isOnCeil) {
+          restartCeilingTimer();
+        }
+
+        return true;
+      },
+      getPopupText: function() {
+        return popupText;
+      },
+      setPopupFloorText: function(value) {
+        popupFloorText = value;
+        popupText = value;
+      },
+      setPopupCeilingText: function(value) {
+        popupCeilingText = value;
+      },
+      getMicroModalConfig: function() {
+        return microModalConfig;
+      },
+      setMinAnswerTime: function(value) {
+        minAnswerTime = value;
+      },
+      setMaxAnswerTime: function(value) {
+        maxAnswerTime = value;
+      },
+      stopTimerModule: function() {
+        stopTimer(timer);
+        stopTimer(ceilingTimer);
+      },
+      getPopupHTML: function() {
+        return '' +
+          `<div class="modal micromodal-slide" id="modal-2" aria-hidden="true">
+            <div class="modal__overlay" tabindex="-1">
+              <div class="modal__container" role="dialog" aria-modal="true" aria-labelledby="modal-2-title">
+                <header class="modal__header">
+                  <button class="modal__close" aria-label="Close modal" data-micromodal-close></button>
+                </header>
+                <main class="modal__content" id="modal-2-content">
+                  <p id="modal-2-content__text"></p>
+                </main>
+                <footer class="modal__footer">
+                  <button class="modal__btn" data-micromodal-close aria-label="Close this dialog window">Close</button>
+                </footer>
+              </div>
+            </div>
+        </div>`;
+      },
+      restartTimerModule: function() {
+        if (isOnFloor) {
+          restartFloorTimer();
+        }
+
+        if (isOnCeil) {
+          restartCeilingTimer();
+        }
+      },
+    };
+  };
+
+  /**
+   * Checks conditions for starting timers.
+   *
+   * @param {String} currentTestName - Name of current test.
+   * @param {String} testName - Name of test for check.
+   *
+   * @return {Boolean}
+   */
+  module.isNeedToStartTimerModuleInitialization = function(currentTestName, testName) {
+    var params = getTimerModuleParamsByTestName(testName);
+
+    return currentTestName === testName && (params.popupFloor|| params.popupCeiling);
+  };
+
+  /**
+   * Initializes the timer module.
+   *
+   * @param {Object} responseStore - Response store.
+   * @param {Number} timestamp - Timestamp.
+   * @param {Number || undefined} testName - Name of test.
+   */
+  module.initializeTimerModule = function(responseStore, timestamp, testName) {
+    var params = getTimerModuleParamsByTestName(testName);
+
+    var moduleApp = module.timerModuleFactory(
+      responseStore,
+      timestamp,
+      params.popupFloor,
+      params.popupCeiling
+    );
+
+    moduleApp.setPopupFloorText(params.textFloor);
+    moduleApp.setPopupCeilingText(params.textCeiling);
+
+    moduleApp.setMinAnswerTime(params.timeFloor);
+    moduleApp.setMaxAnswerTime(params.timeCeiling);
+
+    return moduleApp;
+  };
 
   return module;
 })();
