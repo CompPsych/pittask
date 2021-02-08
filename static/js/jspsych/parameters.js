@@ -3,22 +3,22 @@
  ************************************************************/
 /************************************************************
  * How to use HTML tags guide
- * 
+ *
  * Text formatting:
  * <p>This is some text</p> - defines a paragraph.
  * <b>This is some bold text</b> - Bold text
  * <i>This is some italic text</i> - Italic text
- * This is some text before the line break <br> - produces a line break in the text (carriage-return). 
+ * This is some text before the line break <br> - produces a line break in the text (carriage-return).
  * <br> is independent tag and not require adding closing tag like this </br>
  * <span style="color: red;">This is some formatted text</span> - tag is an inline container used to mark up a part of a text, or a part of a document.
  * Heading tag: It is used to define the heading of HTML document.
- * <h1>Heading 1 </h1>   
- * <h2>Heading 2 </h2> 
- * <h3>Heading 3 </h3>  
- * <h4>Heading 4 </h4>  
- * <h5>Heading 5 </h5>  
- * <h6>Heading 6 </h6> 
- * 
+ * <h1>Heading 1 </h1>
+ * <h2>Heading 2 </h2>
+ * <h3>Heading 3 </h3>
+ * <h4>Heading 4 </h4>
+ * <h5>Heading 5 </h5>
+ * <h6>Heading 6 </h6>
+ *
  * Above, I gave a list of the most common HTML tags used for formatting text.
  * There are a lot of other HTML tags more information about you can find here https://www.w3schools.com/tags/ref_byfunc.asp
  ***********************************************************/
@@ -56,8 +56,8 @@ var shake_transition = 0.05;
  * ===================== GUI COLORS =========================
  ************************************************************/
 var stim1_colour = 'rgb(0,128,0)';
-var stim2_colour = 'rgb(0,0,255)'; 
-var stim3_colour = 'rgb(255,0,0)'; 
+var stim2_colour = 'rgb(0,0,255)';
+var stim3_colour = 'rgb(255,0,0)';
 var stim4_colour = 'rgb(255,215,0)';
 /************************************************************
  * ==================== WEB-BASED FORMS ====================
@@ -76,16 +76,16 @@ var close_instruct_text_WBF = "<p>Thank you.</p> <p>Press any key when you are r
 
 var open_instruct_inventory = true;
 var close_instruct_inventory = false;
-var open_instruct_text_inventory = 
+var open_instruct_text_inventory =
     '<p>We would like to ask about some experiences you may have had.</p><br>' +
     '<p>This is in order to help people who may be troubled by such experiences.</p><br>' +
     '<p>Your answers are anonymous and will not influence your payment.</p><br>' +
-    '<p>Press any key to continue.</p>' 
+    '<p>Press any key to continue.</p>'
 var close_instruct_text_inventory = 'Symptom inventories close';
 
 var open_instruct_demographics = false;
 var close_instruct_demographics = false;
-var open_instruct_text_demographics = 
+var open_instruct_text_demographics =
     '<p>We would like to ask some questions about you.</p><br>' +
     '<p>Your answers are anonymous and will not influence your payment.</p><br>' +
     '<p>Press any key to begin</p>';
@@ -150,7 +150,7 @@ var video_sound = false;
 var open_instruct_video = true;
 var open_instruct_text_video = '<p>You discover something new about one of the snacks. Watch and see what has changed.</p><br>' + '<p> press any key to begin.</p>';
 var close_instruct_video = true;
-var close_instruct_text_video = 
+var close_instruct_text_video =
     "<p>The vending machine is still overflowing, " +
     "and you can tip it again now.</p><br><br> " +
     "<p>You won't always see the snack fall out. All the snacks you get will be recorded.</p><br>" +
@@ -283,3 +283,35 @@ var close_instruct_text_close_HIT_q = 'Thank you for your participation!'
  * Thanks
  ************************************************************/
 var close_instruct_text_thanks = '<p>Thank you!</p><p>Press any key to return to the Amazon Mechanical Turk page.</p><p>This window will close automatically after any keypress on the keyboard.</p><br><p>Please do NOT close the window by clicking on the ‘X’ at the top right corner of this window.</p><p>Otherwise, we cannot process your payment.</p>';
+
+/************************************************************
+ * Timer Popups
+ ************************************************************/
+/* Default */
+var answer_latency_text_floor = 'Please read the questions carefully before answering. Click the ‘x’ to continue.';
+var answer_latency_text_ceiling = 'There are no incorrect answers in this questionnaire. Please select the most correct statement that applies to you. Press the ‘x’ to continue.';
+/* Default */
+
+/* _SI */
+var popup_answer_latency_floor_SI = true;
+var answer_latency_floor_SI = 4000;
+
+var popup_answer_latency_ceiling_SI = true;
+var answer_latency_ceiling_SI = 10000;
+/* _SI */
+
+/* _SDS */
+var popup_answer_latency_floor_SDS = true;
+var answer_latency_floor_SDS = 4000;
+
+var popup_answer_latency_ceiling_SDS = true;
+var answer_latency_ceiling_SDS = 10000;
+/* _SDS */
+
+/* _ICAR */
+var popup_answer_latency_floor_ICAR = true;
+var answer_latency_floor_ICAR = 4000;
+
+var popup_answer_latency_ceiling_ICAR = true;
+var answer_latency_ceiling_ICAR = 10000;
+/* _ICAR */
