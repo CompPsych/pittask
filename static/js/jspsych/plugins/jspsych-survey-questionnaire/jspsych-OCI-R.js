@@ -254,7 +254,7 @@ jsPsych.plugins['OCI-R'] = (function() {
                 <button class="modal__close" aria-label="Close modal" data-micromodal-close></button>
               </header>
               <main class="modal__content" id="modal-1-content">
-                <p>${popup_text_WBF}</p>
+                <p>${ popup_text_WBF }</p>
               </main>
               <footer class="modal__footer">
                 <button class="modal__btn" data-micromodal-close aria-label="Close this dialog window">Close</button>
@@ -328,7 +328,7 @@ jsPsych.plugins['OCI-R'] = (function() {
       return isSuccess;
     });
 
-    $(".modal__btn, .modal__close").on("click touchstart",function(){
+    $(".modal__btn, .modal__close").on("click touchstart", function() {
       response.trial_events.push({
         "event_type": "popup closed",
         "event_raw_details": 'Close',

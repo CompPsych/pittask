@@ -1,5 +1,10 @@
-jsPsych.plugins['PRIME-R'] = (function () {
+jsPsych.plugins['PRIME-R'] = (function() {
   var plugin = {};
+
+  /**
+   * Timer module.
+   */
+  var timerModule = null;
 
   plugin.info = {
     name: 'PRIME',
@@ -87,17 +92,21 @@ jsPsych.plugins['PRIME-R'] = (function () {
         description: 'Event converted details'
       }
     }
-  }
-  plugin.trial = function (display_element, trial) {
+  };
+
+  plugin.trial = function(display_element, trial) {
     var plugin_id_name = "jspsych-survey-multi-choice-PRIME";
-
     var html = "";
-
     // store response
     var response = {
       trial_events: []
     };
     var timestamp_onload = jsPsych.totalTime();
+
+    // timer module init
+    if (jsPsych.pluginAPI.isNeedToStartTimerModuleInitialization(trial.type, 'PRIME-R')) {
+      timerModule = jsPsych.pluginAPI.initializeTimerModule(response, timestamp_onload, '');
+    }
 
     response.trial_events.push({
       "event_type": trial.event_type,
@@ -161,11 +170,9 @@ jsPsych.plugins['PRIME-R'] = (function () {
       html += '<div id="jspsych-survey-multi-choice-preamble" class="jspsych-survey-multi-choice-preamble">' + trial.preamble + '</div>';
     }
 
-
     // form element
     html += '<div id="' + plugin_id_name + '">';
     html += '<form id="jspsych-survey-multi-choice-form" class="jspsych-survey-multi-choice-form">';
-
 
     html +=
       `<div id="jspsych-survey-multi-choice-preamble" class="jspsych-survey-multi-choice-instructions">
@@ -179,28 +186,28 @@ jsPsych.plugins['PRIME-R'] = (function () {
             <li><div>Somewhat agree</div></li>
             <li><div>Definitely agree</div></li>
           </ul>
-      </div>`
-
+      </div>`;
 
     // generate question order. this is randomized here as opposed to randomizing the order of trial.questions
     // so that the data are always associated with the same question regardless of order
     var question_order = [];
+
     for (var i = 0; i < trial.questions.length; i++) {
       question_order.push(i);
     }
+
     if (trial.randomize_question_order) {
       question_order = jsPsych.randomization.shuffle(question_order);
     }
 
     // add multiple-choice questions
     for (var i = 0; i < trial.questions.length; i++) {
-
       // get question based on question_order
       var question = trial.questions[question_order[i]];
       var question_id = question_order[i];
-
       // create question container
       var question_classes = ['jspsych-survey-multi-choice-question'];
+
       if (question.horizontal) {
         question_classes.push('jspsych-survey-multi-choice-horizontal');
       }
@@ -219,7 +226,6 @@ jsPsych.plugins['PRIME-R'] = (function () {
         var option_id_name = "jspsych-survey-multi-choice-option-" + question_id + "-" + j;
         var input_name = 'jspsych-survey-multi-choice-response-' + question_id;
         var input_id = 'jspsych-survey-multi-choice-response-' + question_id + '-' + j;
-
         var required_attr = question.required ? 'required' : '';
 
         // add radio button container
@@ -234,8 +240,6 @@ jsPsych.plugins['PRIME-R'] = (function () {
 
     // add submit button
     html += '<input type="submit" id="' + plugin_id_name + '-next" class="' + plugin_id_name + ' jspsych-btn"' + (trial.button_label ? ' value="' + trial.button_label + '"' : '') + '></input>';
-
-
     html += '</form>';
     html += '</div>';
 
@@ -256,12 +260,16 @@ jsPsych.plugins['PRIME-R'] = (function () {
             </div>
         </div>`;
 
+    // popup of timer module
+    if (timerModule) {
+      html += timerModule.getPopupHTML();
+    }
+
     // render
     display_element.innerHTML = html;
 
     // function to handle key press responses
-    var after_response = function (info) {
-
+    var after_response = function(info) {
       if (info.key_release === undefined) {
         response.trial_events.push({
           "event_type": "key press",
@@ -271,11 +279,12 @@ jsPsych.plugins['PRIME-R'] = (function () {
           "time_elapsed": jsPsych.totalTime() - timestamp_onload
         });
 
-        if(info.el) {
-          if(info.el.dataset.timeStamp) {
+        if (info.el) {
+          if (info.el.dataset.timeStamp) {
             trial.time_stamp[info.el.dataset.timeStamp] = jsPsych.totalTime();
           }
-          if(info.el.dataset.questionNumber) {
+
+          if (info.el.dataset.questionNumber) {
             response.trial_events.push({
               "event_type": "answer displayed",
               "event_raw_details": info.el.dataset.questionNumber,
@@ -296,26 +305,27 @@ jsPsych.plugins['PRIME-R'] = (function () {
       }
     }
 
-    $('.jspsych-survey-highlight').click(function () {
-      $(this).parent().parent().find('.jspsych-survey-highlight').removeClass('bg-primary');
-      $(this).addClass('bg-primary');
+    // highlight input
+    $('.jspsych-survey-highlight').on('click touchstart', function() {
+      var time_stamp_key;
+      var isSuccess = timerModule ? timerModule.check() : true;
+
+      if (isSuccess) {
+        $(this).parent().parent().find('.jspsych-survey-highlight').removeClass('bg-primary');
+        $(this).addClass('bg-primary');
+
+        // save timestamp on input click
+        time_stamp_key = $(this).parent().find('input[type=radio]');
+
+        if (time_stamp_key) {
+          trial.time_stamp[time_stamp_key] = jsPsych.totalTime();
+        }
+      }
+
+      return isSuccess;
     });
 
-    $("label").on("click",function(){
-      var labelID = $(this).attr('for');
-      if('labelID') {
-        $("#" + labelID).prop('checked', true).trigger('click').trigger('change');
-      };
-    });
-
-    $("input[type=radio]").on("click change touchstart",function(){
-      var time_stamp_key = $(this).data('time-stamp'); 
-      if(time_stamp_key) {
-        trial.time_stamp[time_stamp_key] = jsPsych.totalTime();
-      };
-    });
-
-    $(".modal__btn, .modal__close").on("click touchstart",function(){
+    $(".modal__btn, .modal__close").on("click touchstart", function() {
       response.trial_events.push({
         "event_type": "popup closed",
         "event_raw_details": 'Close',
@@ -325,7 +335,7 @@ jsPsych.plugins['PRIME-R'] = (function () {
       });
     });
 
-    document.querySelector('form').addEventListener('submit', function (event) {
+    document.querySelector('form').addEventListener('submit', function(event) {
       event.preventDefault();
       // measure response time
       var endTime = performance.now();
@@ -342,23 +352,30 @@ jsPsych.plugins['PRIME-R'] = (function () {
       // create object to hold responses
       var question_data = {};
       var timestamp_data = {};
+
       for (var i = 0; i < trial.questions.length; i++) {
         var match = display_element.querySelector('#jspsych-survey-multi-choice-' + i);
         var id = i + 1;
+
         if (match.querySelector("input[type=radio]:checked") !== null) {
           var val = match.querySelector("input[type=radio]:checked").value;
+
           $(match).find('.jspsych-survey-multi-choice-question-text').removeClass('survey-error-after');
           $(match).find('.jspsych-survey-multi-choice-number').removeClass('survey-error-text');
         } else {
           var val = "";
+
           $(match).find('.jspsych-survey-multi-choice-question-text').addClass('survey-error-after');
           $(match).find('.jspsych-survey-multi-choice-number').addClass('survey-error-text');
         }
+
         var obje = {};
         var name = id;
+
         if (match.attributes['data-name'].value !== '') {
           name = match.attributes['data-name'].value;
         }
+
         obje[name] = val;
         timestamp_data[name] = trial.time_stamp['Q' + id];
         Object.assign(question_data, obje);
@@ -369,6 +386,12 @@ jsPsych.plugins['PRIME-R'] = (function () {
         if (typeof keyboardListener !== 'undefined') {
           jsPsych.pluginAPI.cancelKeyboardResponse(keyboardListener);
           jsPsych.pluginAPI.cancelClickResponse(clickListener);
+
+          // destroy timer module
+          if (timerModule) {
+            timerModule.stopTimerModule();
+            timerModule = null;
+          }
         }
 
         // save data
@@ -396,7 +419,6 @@ jsPsych.plugins['PRIME-R'] = (function () {
           "time_elapsed": jsPsych.totalTime() - timestamp_onload
         });
       }
-
     });
 
     var startTime = performance.now();
@@ -409,6 +431,7 @@ jsPsych.plugins['PRIME-R'] = (function () {
       persist: true,
       allow_held_key: false
     });
+
     var clickListener = jsPsych.pluginAPI.getMouseResponse({
       callback_function: after_response,
       valid_responses: jsPsych.ALL_KEYS,

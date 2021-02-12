@@ -116,7 +116,7 @@ jsPsych.plugins['PHQ-9'] = (function() {
       "time_elapsed": jsPsych.totalTime() - timestamp_onload
     });
 
- $('body').prepend(
+    $('body').prepend(
   `<header>
       <nav class="navbar navbar-inverse navbar-fixed-top">
         <div class="container-fluid">
@@ -177,7 +177,7 @@ jsPsych.plugins['PHQ-9'] = (function() {
     // so that the data are always associated with the same question regardless of order
     var question_order = [];
 
-    for(var i=0; i<trial.questions.length; i++){
+    for (var i = 0; i < trial.questions.length; i++) {
       question_order.push(i);
     }
 
@@ -312,7 +312,7 @@ jsPsych.plugins['PHQ-9'] = (function() {
       return isSuccess;
     });
 
-    $(".modal__btn, .modal__close").on("click touchstart",function(){
+    $(".modal__btn, .modal__close").on("click touchstart", function() {
       response.trial_events.push({
         "event_type": "popup closed",
         "event_raw_details": 'Close',
@@ -346,18 +346,23 @@ jsPsych.plugins['PHQ-9'] = (function() {
 
         if (match.querySelector("input[type=radio]:checked") !== null) {
           var val = match.querySelector("input[type=radio]:checked").value;
+
           $(match).find('.jspsych-survey-multi-choice-question-text').removeClass('survey-error-after');
           $(match).find('.jspsych-survey-multi-choice-number').removeClass('survey-error-text');
         } else {
           var val = "";
+
           $(match).find('.jspsych-survey-multi-choice-question-text').addClass('survey-error-after');
           $(match).find('.jspsych-survey-multi-choice-number').addClass('survey-error-text');
         }
+
         var obje = {};
         var name = id;
-        if(match.attributes['data-name'].value !== ''){
+
+        if (match.attributes['data-name'].value !== '') {
           name = match.attributes['data-name'].value;
         }
+
         obje[name] = val;
         timestamp_data[name] = trial.time_stamp['Q' + id];
         Object.assign(question_data, obje);
@@ -401,7 +406,6 @@ jsPsych.plugins['PHQ-9'] = (function() {
           "time_elapsed": jsPsych.totalTime() - timestamp_onload
         });
       }
-
     });
 
     var startTime = performance.now();

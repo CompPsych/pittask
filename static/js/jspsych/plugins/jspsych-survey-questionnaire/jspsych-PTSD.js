@@ -1,6 +1,11 @@
 jsPsych.plugins['PC-PTSD-5'] = (function() {
   var plugin = {};
 
+  /**
+   * Timer module.
+   */
+  var timerModule = null;
+
   plugin.info = {
     name: 'PC-PTSD-5',
     stage_name: 'PC-PTSD-5',
@@ -87,17 +92,22 @@ jsPsych.plugins['PC-PTSD-5'] = (function() {
         description: 'Event converted details'
       }
     }
-  }
+  };
+
   plugin.trial = function(display_element, trial) {
     var plugin_id_name = "jspsych-survey-multi-choice-PC-PTSD-5";
     var isHidden = false;
     var html = "";
-
     // store response
     var response = {
       trial_events: []
     };
     var timestamp_onload = jsPsych.totalTime();
+
+    // timer module init
+    if (jsPsych.pluginAPI.isNeedToStartTimerModuleInitialization(trial.type, 'PC-PTSD-5')) {
+      timerModule = jsPsych.pluginAPI.initializeTimerModule(response, timestamp_onload, '');
+    }
 
     response.trial_events.push({
       "event_type": trial.event_type,
@@ -107,7 +117,7 @@ jsPsych.plugins['PC-PTSD-5'] = (function() {
       "time_elapsed": jsPsych.totalTime() - timestamp_onload
     });
 
- $('body').prepend(
+    $('body').prepend(
     `<header>
       <nav class="navbar navbar-inverse navbar-fixed-top">
         <div class="container-fluid">
@@ -149,53 +159,53 @@ jsPsych.plugins['PC-PTSD-5'] = (function() {
     html += '</style>';
 
     // show preamble text
-    if(trial.preamble !== null){
+    if (trial.preamble !== null) {
       html += '<div id="jspsych-survey-multi-choice-preamble" class="jspsych-survey-multi-choice-preamble">'+trial.preamble+'</div>';
     }
 
     // form element
     html += '<div id="' + plugin_id_name + '">';
     html += '<form id="jspsych-survey-multi-choice-form">';
-    
+
     // generate question order. this is randomized here as opposed to randomizing the order of trial.questions
     // so that the data are always associated with the same question regardless of order
     var question_order = [];
-    for(var i=0; i<trial.questions.length; i++){
+
+    for (var i = 0; i < trial.questions.length; i++) {
       question_order.push(i);
     }
-    if(trial.randomize_question_order){
+
+    if (trial.randomize_question_order) {
       question_order = jsPsych.randomization.shuffle(question_order);
     }
-    
+
     // add multiple-choice questions
     for (var i = 0; i < trial.questions.length; i++) {
-      
       // get question based on question_order
       var question = trial.questions[question_order[i]];
       var question_id = question_order[i];
-      
       // create question container
       var question_classes = ['jspsych-survey-multi-choice-question'];
+
       if (question.horizontal) {
         question_classes.push('jspsych-survey-multi-choice-horizontal');
       }
 
-      
-      if(i === 0) {
+      if (i === 0) {
         html += '<div style="margin-bottom: 8rem;" id="jspsych-survey-multi-choice-'+question_id+'" class="'+question_classes.join(' ')+'"  data-name="'+question.name+'">';
         // add question text
-        html += '<div class="jspsych-survey-multi-choice-option-left-first"><p class="jspsych-survey-multi-choice-text survey-multi-choice jspsych-survey-multi-choice-question-text" style="padding-top: 3px;">' +  question.prompt 
-      
+        html += '<div class="jspsych-survey-multi-choice-option-left-first"><p class="jspsych-survey-multi-choice-text survey-multi-choice jspsych-survey-multi-choice-question-text" style="padding-top: 3px;">' +  question.prompt
+
       } else {
-        if(i === 1) {
+        if (i === 1) {
           html += '<div class="'+question_classes.join(' ')+' hidden"  data-name="'+question.name+'"><p>In the past month, have you...</p></div>';
-        };
+        }
+
         html += '<div id="jspsych-survey-multi-choice-'+question_id+'" class="'+question_classes.join(' ')+' hidden"  data-name="'+question.name+'">';
         // add question text
-        html += '<div class="jspsych-survey-multi-choice-option-left"><span class="jspsych-survey-multi-choice-number">' + i + '.</span><p class="jspsych-survey-multi-choice-text survey-multi-choice jspsych-survey-multi-choice-question-text">' +  question.prompt 
+        html += '<div class="jspsych-survey-multi-choice-option-left"><span class="jspsych-survey-multi-choice-number">' + i + '.</span><p class="jspsych-survey-multi-choice-text survey-multi-choice jspsych-survey-multi-choice-question-text">' +  question.prompt
       }
 
-  
       // question.required
       html += '</p></div>';
       html += '<div class="jspsych-survey-multi-choice-option-right">';
@@ -208,7 +218,6 @@ jsPsych.plugins['PC-PTSD-5'] = (function() {
         var option_id_name = "jspsych-survey-multi-choice-option-"+question_id+"-"+j;
         var input_name = 'jspsych-survey-multi-choice-response-'+question_id;
         var input_id = 'jspsych-survey-multi-choice-response-'+question_id+'-'+j;
-
         var required_attr = question.required ? 'required' : '';
 
         // add radio button container
@@ -216,20 +225,20 @@ jsPsych.plugins['PC-PTSD-5'] = (function() {
         html += '<label class="jspsych-survey-multi-choice-text jspsych-survey-highlight ' + input_id + ' " data-time-stamp="Q' + (i+1) + '" data-question-number="Q' + (i+1) +'A' + (j+1) +'" for="'+input_id+'">' +question.options[j]+'</label>';
         html += '<input hidden type="radio" name="'+input_name+'" id="'+input_id+'" data-time-stamp="Q' + (i+1) + '" data-question-number="Q' + (i+1) +'A' + (j+1) +'" value="'+question.options[j]+'" '+required_attr+'></input>';
         html += '</div>';
-        if(j === 0) {
+
+        if (j === 0) {
           html += '<span style="position: absolute; padding-top: 9px;">/</span>';
         }
       }
-      html += '</div>';
 
+      html += '</div>';
       html += '</div></div>';
     }
-    
+
     // add submit button
     html += '<input type="submit" id="'+plugin_id_name+'-next" class="'+plugin_id_name+' jspsych-btn"' + (trial.button_label ? ' value="'+trial.button_label + '"': '') + '></input>';
     html += '</form>';
 
-    
     html +=
       `<div class="modal micromodal-slide" id="modal-1" aria-hidden="true">
           <div class="modal__overlay" tabindex="-1" data-micromodal-close>
@@ -238,7 +247,7 @@ jsPsych.plugins['PC-PTSD-5'] = (function() {
                 <button class="modal__close" aria-label="Close modal" data-micromodal-close></button>
               </header>
               <main class="modal__content" id="modal-1-content">
-                <p>${popup_text_WBF}</p>
+                <p>${ popup_text_WBF }</p>
               </main>
               <footer class="modal__footer">
                 <button class="modal__btn" data-micromodal-close aria-label="Close this dialog window">Close</button>
@@ -247,11 +256,16 @@ jsPsych.plugins['PC-PTSD-5'] = (function() {
           </div>
       </div>`;
 
+    // popup of timer module
+    if (timerModule) {
+      html += timerModule.getPopupHTML();
+    }
+
     // render
     display_element.innerHTML = html;
 
     // function to handle key press responses
-    var after_response = function (info) {
+    var after_response = function(info) {
       if (info.key_release === undefined) {
         response.trial_events.push({
           "event_type": "key press",
@@ -261,11 +275,12 @@ jsPsych.plugins['PC-PTSD-5'] = (function() {
           "time_elapsed": jsPsych.totalTime() - timestamp_onload
         });
 
-        if(info.el) {
-          if(info.el.dataset.timeStamp) {
+        if (info.el) {
+          if (info.el.dataset.timeStamp) {
             trial.time_stamp[info.el.dataset.timeStamp] = jsPsych.totalTime();
           }
-          if(info.el.dataset.questionNumber) {
+
+          if (info.el.dataset.questionNumber) {
             response.trial_events.push({
               "event_type": "answer displayed",
               "event_raw_details": info.el.dataset.questionNumber,
@@ -286,34 +301,54 @@ jsPsych.plugins['PC-PTSD-5'] = (function() {
       }
     }
 
-    $('.jspsych-survey-highlight').click(function () {
-      $(this).parent().parent().find('.jspsych-survey-highlight').removeClass('bg-primary');
-      $(this).addClass('bg-primary');
+    // highlight input
+    $('.jspsych-survey-highlight').on('click touchstart', function() {
+      if ($(this).hasClass('disabled')) {
+        return false;
+      }
+
+      var time_stamp_key;
+      var isSuccess = timerModule ? timerModule.check() : true;
+
+      if (isSuccess) {
+        if ($(this).hasClass('jspsych-survey-multi-choice-response-0-0')) {
+          showSecondForm($(this));
+        }
+
+        if ($(this).hasClass('jspsych-survey-multi-choice-response-0-1')) {
+          $(this).parent().parent().find('.jspsych-survey-multi-choice-response-0-0').addClass('disabled');
+          $(this).addClass('disabled');
+        }
+
+        $(this).parent().parent().find('.jspsych-survey-highlight').removeClass('bg-primary');
+        $(this).addClass('bg-primary');
+
+        // save timestamp on input click
+        time_stamp_key = $(this).parent().find('input[type=radio]');
+
+        if (time_stamp_key) {
+          trial.time_stamp[time_stamp_key] = jsPsych.totalTime();
+        }
+      }
+
+      return isSuccess;
     });
 
-    $("label").on("click",function(){
-      var labelID = $(this).attr('for');
-      if('labelID') {
-        $("#" + labelID).prop('checked', true).trigger('click').trigger('change');
-      };
-    });
-
-    $("input[type=radio]").on("click change touchstart",function(){
-      var time_stamp_key = $(this).data('time-stamp'); 
-      if(time_stamp_key) {
-        trial.time_stamp[time_stamp_key] = jsPsych.totalTime();
-      };
-    });
-
-    $('.jspsych-survey-multi-choice-response-0-0').click(function() {
+    function showSecondForm($element) {
       isHidden = true;
       $('.jspsych-survey-multi-choice-horizontal').removeClass('hidden');
-      $(this).parent().parent().find('.jspsych-survey-overlay').removeClass('hidden');
-      $('#jspsych-survey-multi-choice-response-0-0').prop('disabled', true);
-      $('#jspsych-survey-multi-choice-response-0-1').prop('disabled', true);
-    })
+      $element.parent().parent().find('.jspsych-survey-overlay').removeClass('hidden');
+    }
 
-    $(".modal__btn, .modal__close").on("click touchstart",function(){
+    // $('.jspsych-survey-multi-choice-response-0-0').click(function() {
+    //   isHidden = true;
+    //   $('.jspsych-survey-multi-choice-horizontal').removeClass('hidden');
+    //   $(this).parent().parent().find('.jspsych-survey-overlay').removeClass('hidden');
+    //   $('#jspsych-survey-multi-choice-response-0-0').prop('disabled', true);
+    //   $('#jspsych-survey-multi-choice-response-0-1').prop('disabled', true);
+    // })
+
+    $(".modal__btn, .modal__close").on("click touchstart", function() {
       response.trial_events.push({
         "event_type": "popup closed",
         "event_raw_details": 'Close',
@@ -340,35 +375,39 @@ jsPsych.plugins['PC-PTSD-5'] = (function() {
       // create object to hold responses
       var question_data = {};
       var timestamp_data = {};
-      for(var i=0; i<trial.questions.length; i++){
-        var match = display_element.querySelector('#jspsych-survey-multi-choice-'+i);
+
+      for (var i=0; i<trial.questions.length; i++) {
+        var match = display_element.querySelector('#jspsych-survey-multi-choice-' + i);
         var id = i;
 
-        if(match.querySelector("input[type=radio]:checked") !== null){
+        if (match.querySelector("input[type=radio]:checked") !== null) {
           var val = match.querySelector("input[type=radio]:checked").value;
+
           $(match).find('.jspsych-survey-multi-choice-question-text').removeClass('survey-error-after');
           $(match).find('.jspsych-survey-multi-choice-number').removeClass('survey-error-text');
         } else {
           var val = "";
+
           $(match).find('.jspsych-survey-multi-choice-question-text').addClass('survey-error-after');
           $(match).find('.jspsych-survey-multi-choice-number').addClass('survey-error-text');
         }
 
-        if(i === 0) {
+        if (i === 0) {
           id = 'screen';
         } else if(i != 0 && !isHidden) {
           val = 'NA';
           $(match).find('.jspsych-survey-multi-choice-question-text').removeClass('survey-error-after');
         }
-       
+
         var obje = {};
         var name = id;
-        if(match.attributes['data-name'].value !== ''){
+
+        if (match.attributes['data-name'].value !== '') {
           name = match.attributes['data-name'].value;
         }
 
         timestamp_data[name] = val === 'NA' ? val : trial.time_stamp['Q' + (i+1)];
-        obje[name] = val; 
+        obje[name] = val;
         Object.assign(question_data, obje);
       }
 
@@ -377,6 +416,12 @@ jsPsych.plugins['PC-PTSD-5'] = (function() {
         if (typeof keyboardListener !== 'undefined') {
           jsPsych.pluginAPI.cancelKeyboardResponse(keyboardListener);
           jsPsych.pluginAPI.cancelClickResponse(clickListener);
+
+          // destroy timer module
+          if (timerModule) {
+            timerModule.stopTimerModule();
+            timerModule = null;
+          }
         }
 
         // save data
@@ -404,7 +449,6 @@ jsPsych.plugins['PC-PTSD-5'] = (function() {
           "time_elapsed": jsPsych.totalTime() - timestamp_onload
         });
       }
-
     });
 
     var startTime = performance.now();
@@ -417,6 +461,7 @@ jsPsych.plugins['PC-PTSD-5'] = (function() {
       persist: true,
       allow_held_key: false
     });
+
     var clickListener = jsPsych.pluginAPI.getMouseResponse({
       callback_function: after_response,
       valid_responses: jsPsych.ALL_KEYS,

@@ -201,7 +201,7 @@ jsPsych.plugins['LSAS'] = (function() {
                   </ul>
               </div>
           </div>
-      </div>`
+      </div>`;
 
     // generate question order. this is randomized here as opposed to randomizing the order of trial.questions
     // so that the data are always associated with the same question regardless of order
@@ -268,7 +268,6 @@ jsPsych.plugins['LSAS'] = (function() {
 
     // add submit button
     html += '<input type="submit" id="' + plugin_id_name + '-next" class="' + plugin_id_name + ' jspsych-btn"' + (trial.button_label ? ' value="' + trial.button_label + '"' : '') + '></input>';
-
     html += '</form>';
     html += '</div>';
 

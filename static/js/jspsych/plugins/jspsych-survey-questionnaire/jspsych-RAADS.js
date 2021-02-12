@@ -1,5 +1,10 @@
-jsPsych.plugins['RAADS-14'] = (function () {
+jsPsych.plugins['RAADS-14'] = (function() {
   var plugin = {};
+
+  /**
+   * Timer module.
+   */
+  var timerModule = null;
 
   plugin.info = {
     name: 'RAADS-14',
@@ -87,17 +92,21 @@ jsPsych.plugins['RAADS-14'] = (function () {
         description: 'Event converted details'
       }
     }
-  }
-  plugin.trial = function (display_element, trial) {
+  };
+
+  plugin.trial = function(display_element, trial) {
     var plugin_id_name = "jspsych-survey-multi-choice-RAADS-14";
-
     var html = "";
-
     // store response
     var response = {
       trial_events: []
     };
     var timestamp_onload = jsPsych.totalTime();
+
+    // timer module init
+    if (jsPsych.pluginAPI.isNeedToStartTimerModuleInitialization(trial.type, 'RAADS-14')) {
+      timerModule = jsPsych.pluginAPI.initializeTimerModule(response, timestamp_onload, '');
+    }
 
     response.trial_events.push({
       "event_type": trial.event_type,
@@ -171,27 +180,29 @@ jsPsych.plugins['RAADS-14'] = (function () {
             <li>True only when I was younger than 16</li>
             <li>Never true</li>
           </ul>
-    </div>`
+    </div>`;
 
     // generate question order. this is randomized here as opposed to randomizing the order of trial.questions
     // so that the data are always associated with the same question regardless of order
     var question_order = [];
+
     for (var i = 0; i < trial.questions.length; i++) {
       question_order.push(i);
     }
+
     if (trial.randomize_question_order) {
       question_order = jsPsych.randomization.shuffle(question_order);
     }
 
     // add multiple-choice questions
     for (var i = 0; i < trial.questions.length; i++) {
-
       // get question based on question_order
       var question = trial.questions[question_order[i]];
       var question_id = question_order[i];
 
       // create question container
       var question_classes = ['jspsych-survey-multi-choice-question'];
+
       if (question.horizontal) {
         question_classes.push('jspsych-survey-multi-choice-horizontal');
       }
@@ -227,7 +238,6 @@ jsPsych.plugins['RAADS-14'] = (function () {
 
     // add submit button
     html += '<p><input type="submit" id="' + plugin_id_name + '-next" class="' + plugin_id_name + ' jspsych-btn"' + (trial.button_label ? ' value="' + trial.button_label + '"' : '') + '></input></p>';
-
     html += '</form>';
 
     html +=
@@ -239,7 +249,7 @@ jsPsych.plugins['RAADS-14'] = (function () {
               </header>
               <main class="modal__content" id="modal-1-content">
                 <p>
-                ${popup_text_WBF}
+                ${ popup_text_WBF }
                 </p>
               </main>
               <footer class="modal__footer">
@@ -249,13 +259,16 @@ jsPsych.plugins['RAADS-14'] = (function () {
           </div>
       </div>`;
 
+    // popup of timer module
+    if (timerModule) {
+      html += timerModule.getPopupHTML();
+    }
 
     // render
     display_element.innerHTML = html;
 
     // function to handle key press responses
-    var after_response = function (info) {
-
+    var after_response = function(info) {
       if (info.key_release === undefined) {
         response.trial_events.push({
           "event_type": "key press",
@@ -265,11 +278,12 @@ jsPsych.plugins['RAADS-14'] = (function () {
           "time_elapsed": jsPsych.totalTime() - timestamp_onload
         });
 
-        if(info.el) {
-          if(info.el.dataset.timeStamp) {
+        if (info.el) {
+          if (info.el.dataset.timeStamp) {
             trial.time_stamp[info.el.dataset.timeStamp] = jsPsych.totalTime();
           }
-          if(info.el.dataset.questionNumber) {
+
+          if (info.el.dataset.questionNumber) {
             response.trial_events.push({
               "event_type": "answer displayed",
               "event_raw_details": info.el.dataset.questionNumber,
@@ -290,14 +304,25 @@ jsPsych.plugins['RAADS-14'] = (function () {
       }
     }
 
-    $("input[type=radio]").on("click change touchstart",function(){
-      var time_stamp_key = $(this).data('time-stamp'); 
-      if(time_stamp_key) {
-        trial.time_stamp[time_stamp_key] = jsPsych.totalTime();
-      };
+    // save timestamp on input click
+    $('input[type=radio]').on('click touchstart', function(event) {
+      if (event.type === 'click' || event.type === 'touchstart') {
+        var isSuccess = timerModule ? timerModule.check() : true;
+        var time_stamp_key;
+
+        if (isSuccess) {
+          time_stamp_key = $(this).data('time-stamp');
+
+          if (time_stamp_key) {
+            trial.time_stamp[time_stamp_key] = jsPsych.totalTime();
+          }
+        }
+
+        return isSuccess
+      }
     });
 
-    $(".modal__btn, .modal__close").on("click touchstart",function(){
+    $(".modal__btn, .modal__close").on("click touchstart", function() {
       response.trial_events.push({
         "event_type": "popup closed",
         "event_raw_details": 'Close',
@@ -307,7 +332,7 @@ jsPsych.plugins['RAADS-14'] = (function () {
       });
     });
 
-    document.querySelector('form').addEventListener('submit', function (event) {
+    document.querySelector('form').addEventListener('submit', function(event) {
       event.preventDefault();
       // measure response time
       var endTime = performance.now();
@@ -324,12 +349,14 @@ jsPsych.plugins['RAADS-14'] = (function () {
       // create object to hold responses
       var question_data = {};
       var timestamp_data = {};
+
       for (var i = 0; i < trial.questions.length; i++) {
         var match = display_element.querySelector('#jspsych-survey-multi-choice-' + i);
-
         var id = i + 1;
+
         if (match.querySelector("input[type=radio]:checked") !== null) {
           var val = match.querySelector("input[type=radio]:checked").value;
+
           $(match).find('.jspsych-survey-multi-choice-question').removeClass('survey-error-after');
           $(match).find('.jspsych-survey-multi-choice-number').removeClass('survey-error-text');
         } else {
@@ -337,11 +364,14 @@ jsPsych.plugins['RAADS-14'] = (function () {
           $(match).find('.jspsych-survey-multi-choice-number').addClass('survey-error-text');
           var val = "";
         }
+
         var obje = {};
         var name = id;
+
         if (match.attributes['data-name'].value !== '') {
           name = match.attributes['data-name'].value;
         }
+
         obje[name] = val;
         timestamp_data[name] = trial.time_stamp['Q' + id];
         Object.assign(question_data, obje);
@@ -352,6 +382,12 @@ jsPsych.plugins['RAADS-14'] = (function () {
         if (typeof keyboardListener !== 'undefined') {
           jsPsych.pluginAPI.cancelKeyboardResponse(keyboardListener);
           jsPsych.pluginAPI.cancelClickResponse(clickListener);
+
+          // destroy timer module
+          if (timerModule) {
+            timerModule.stopTimerModule();
+            timerModule = null;
+          }
         }
 
         // save data
@@ -379,7 +415,6 @@ jsPsych.plugins['RAADS-14'] = (function () {
           "time_elapsed": jsPsych.totalTime() - timestamp_onload
         });
       }
-
     });
 
     var startTime = performance.now();
@@ -392,6 +427,7 @@ jsPsych.plugins['RAADS-14'] = (function () {
       persist: true,
       allow_held_key: false
     });
+
     var clickListener = jsPsych.pluginAPI.getMouseResponse({
       callback_function: after_response,
       valid_responses: jsPsych.ALL_KEYS,
@@ -399,7 +435,6 @@ jsPsych.plugins['RAADS-14'] = (function () {
       persist: true,
       allow_held_key: false
     });
-
   };
 
   return plugin;
