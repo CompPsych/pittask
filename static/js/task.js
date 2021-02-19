@@ -52,7 +52,7 @@ var counter_balancing_input = [
         right: 'BBQ',
         video: '/static/video/TT',
         converted_details: "TT"
-    }, 
+    },
     d = {
         game_version: 'D',
         left: 'BBQ',
@@ -122,7 +122,7 @@ var counter_balancing_input = [
 var counter_balancing = jsPsych.randomization.sampleWithoutReplacement(counter_balancing_input, 1);
 
 // Reconnection to the Database
-var error_message = 
+var error_message =
 "<div class='jspsych-content-wrapper'>" +
 "<div class='jspsych-content'>" +
 "<h1>Oops!</h1>" +
@@ -134,7 +134,7 @@ var error_message =
 prompt_resubmit = function() {
     $( "body" ).addClass("jspsych-display-element");
     document.body.innerHTML = error_message;
-    
+
     $("#resubmit").click(resubmit);
 };
 
@@ -530,7 +530,10 @@ var vvr_1_vars = {
     min_num_correct: min_num_correct_VVR1,
     max_num_incorrect: max_num_incorrect_VVR1,
     prob_value: prob_value_VVR1,
-    degrad_pattern: degrad_pattern_VVR1
+    degrad_pattern: degrad_pattern_VVR1,
+    popup_machine: popup_machine_VVR1,
+    popup_machine_duration: popup_duration_machine_VVR1,
+    popup_machine_text: popup_text_machine_VVR1
 };
 
 var vvr_2_vars = {
@@ -539,7 +542,10 @@ var vvr_2_vars = {
     min_num_correct: min_num_correct_VVR2,
     max_num_incorrect: max_num_incorrect_VVR2,
     prob_value: prob_value_VVR2,
-    degrad_pattern: degrad_pattern_VVR2
+    degrad_pattern: degrad_pattern_VVR2,
+    popup_machine: popup_machine_VVR2,
+    popup_machine_duration: popup_duration_machine_VVR2,
+    popup_machine_text: popup_text_machine_VVR2
 };
 
 var vvr_3_vars = {
@@ -548,7 +554,10 @@ var vvr_3_vars = {
     min_num_correct: min_num_correct_VVR3,
     max_num_incorrect: max_num_incorrect_VVR3,
     prob_value: prob_value_VVR3,
-    degrad_pattern: degrad_pattern_VVR3
+    degrad_pattern: degrad_pattern_VVR3,
+    popup_machine: popup_machine_VVR3,
+    popup_machine_duration: popup_duration_machine_VVR3,
+    popup_machine_text: popup_text_machine_VVR3
 };
 
 // main function used for all VVR stages
@@ -567,7 +576,10 @@ var VVR = function(data) {
             VVR_OUTCOME_DURATION: outcome_duration,
             VVR_PROB_VALUE: data.prob_value,
             VVR_DEGRAD_PATTERN : data.degrad_pattern,
-        }
+        },
+        popup_machine: data.popup_machine,
+        popup_machine_duration: data.popup_machine_duration,
+        popup_machine_text: data.popup_machine_text
     };
 
     var questions_a = {
@@ -686,7 +698,7 @@ var VVR = function(data) {
     vvr_shuffle_questions();
 
     var loop_node_VVR = {
-        timeline: [ vvr_a, 
+        timeline: [ vvr_a,
                 {
                     timeline: [questions_a],
                     conditional_function: function() {
@@ -718,7 +730,7 @@ var VVR = function(data) {
 
             if(loop_node_counter_vvr_determination >= min_blocks_num && max_num_incorrect <= loop_node_counter_max_num_incorrect) {
                 reset_vars();
-                return false;            
+                return false;
             } else if(loop_node_counter_vvr_determination >= min_blocks_num && min_num_correct <= loop_node_counter_max_num_correct) {
                 reset_vars();
                 return false;
@@ -735,7 +747,7 @@ var VVR = function(data) {
 var VVR1 = {
     timeline: [
         {
-            timeline: [{ 
+            timeline: [{
                 stage_name: 'VVR1_open',
                 type: 'html-keyboard-response',
                 stimulus: open_instruct_text_VVR1,
@@ -772,7 +784,7 @@ var VVR1 = {
 var VVR2 = {
     timeline: [
         {
-            timeline: [{ 
+            timeline: [{
                 stage_name: 'VVR2_open',
                 type: 'html-keyboard-response',
                 stimulus: open_instruct_text_VVR2,
@@ -809,7 +821,7 @@ var VVR2 = {
 var VVR3 = {
     timeline: [
         {
-            timeline: [{ 
+            timeline: [{
                 stage_name: 'VVR3_open',
                 type: 'html-keyboard-response',
                 stimulus: open_instruct_text_VVR3,
@@ -987,7 +999,7 @@ var PAV_CONDITIONING_MAIN = {
             type: 'html-keyboard-response',
             pav_con_timer: true,
             stimulus: function() {
-                if(pav_is_correct) { 
+                if(pav_is_correct) {
                     return '<p style="font-size: 24px;">' + correct_text + '</p>';
                 } else {
                     return '<p style="font-size: 24px;">' + incorrect_text + '</p>';
@@ -1000,14 +1012,14 @@ var PAV_CONDITIONING_MAIN = {
                    return 'correct_text'
                } else {
                    return 'incorrect_text'
-               } 
+               }
             },
             event_converted_details: function() {
                 if(pav_is_correct){
                     return 'correct_text text appears'
                 } else {
                     return 'incorrect_text text appears'
-                } 
+                }
             }
         }
     ],
@@ -1064,7 +1076,7 @@ var PAV_TEST_INSTRUCT_CLOSE = {
 var PAV_CON = {
     timeline: [
         PAV_TEST_INSTRUCT_OPEN,
-        PAV_CONDITIONING_MAIN, 
+        PAV_CONDITIONING_MAIN,
         PAV_TEST_INSTRUCT_CLOSE
     ]
 };
@@ -1094,8 +1106,11 @@ var TRANSFER1 = {
             stimulus: 'vending machine',
             transfer_test_color_duration: stim_duration,
             transfer_test_white_duration: ITI_duration,
-            sequence_reps: block_num_transfer_test
-        }, 
+            sequence_reps: block_num_transfer_test,
+            popup_machine: popup_machine_transfer1,
+            popup_machine_duration: popup_duration_machine_transfer1,
+            popup_machine_text: popup_text_machine_transfer1
+        },
         {
             timeline: [{
                 stage_name: 'transfer1_close',
@@ -1142,8 +1157,11 @@ var TRANSFER2 = {
             stimulus: 'vending machine',
             transfer_test_color_duration: stim_duration,
             transfer_test_white_duration: ITI_duration,
-            sequence_reps: block_num_transfer_test
-        }, 
+            sequence_reps: block_num_transfer_test,
+            popup_machine: popup_machine_transfer1,
+            popup_machine_duration: popup_duration_machine_transfer1,
+            popup_machine_text: popup_text_machine_transfer1
+        },
         {
             timeline: [{
                 stage_name: 'transfer2_close',
@@ -1190,8 +1208,11 @@ var TRANSFER3 = {
             stimulus: 'vending machine',
             transfer_test_color_duration: stim_duration,
             transfer_test_white_duration: ITI_duration,
-            sequence_reps: block_num_transfer_test
-        }, 
+            sequence_reps: block_num_transfer_test,
+            popup_machine: popup_machine_transfer1,
+            popup_machine_duration: popup_duration_machine_transfer1,
+            popup_machine_text: popup_text_machine_transfer1
+        },
         {
             timeline: [{
                 stage_name: 'transfer3_close',
@@ -1216,7 +1237,7 @@ var TRANSFER3 = {
 
 var DEVAL_VIDEO = {
     timeline: [
-        {   
+        {
             timeline: [{
                 stage_name: 'deval_video_open',
                 type: 'html-keyboard-response',
@@ -1243,7 +1264,7 @@ var DEVAL_VIDEO = {
             trial_ends_after_video: true,
             audio: video_sound
         },
-        {   
+        {
             timeline: [{
                 stage_name: 'deval_video_close',
                 type: 'html-keyboard-response',
@@ -1267,7 +1288,10 @@ var DEVAL_TEST_MAIN = {
     type: 'transfer-test',
     stimulus: 'vending machine',
     trial_duration: deval_test_duration,
-    sequence_reps: 1
+    sequence_reps: 1,
+    popup_machine: popup_machine_deval_test,
+    popup_machine_duration: popup_duration_machine_deval_test,
+    popup_machine_text: popup_text_machine_deval_test
 };
 
 var DEVAL_TEST_INSTRUCT_OPEN = {

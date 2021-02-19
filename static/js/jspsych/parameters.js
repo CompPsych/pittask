@@ -3,22 +3,22 @@
  ************************************************************/
 /************************************************************
  * How to use HTML tags guide
- * 
+ *
  * Text formatting:
  * <p>This is some text</p> - defines a paragraph.
  * <b>This is some bold text</b> - Bold text
  * <i>This is some italic text</i> - Italic text
- * This is some text before the line break <br> - produces a line break in the text (carriage-return). 
+ * This is some text before the line break <br> - produces a line break in the text (carriage-return).
  * <br> is independent tag and not require adding closing tag like this </br>
  * <span style="color: red;">This is some formatted text</span> - tag is an inline container used to mark up a part of a text, or a part of a document.
  * Heading tag: It is used to define the heading of HTML document.
- * <h1>Heading 1 </h1>   
- * <h2>Heading 2 </h2> 
- * <h3>Heading 3 </h3>  
- * <h4>Heading 4 </h4>  
- * <h5>Heading 5 </h5>  
- * <h6>Heading 6 </h6> 
- * 
+ * <h1>Heading 1 </h1>
+ * <h2>Heading 2 </h2>
+ * <h3>Heading 3 </h3>
+ * <h4>Heading 4 </h4>
+ * <h5>Heading 5 </h5>
+ * <h6>Heading 6 </h6>
+ *
  * Above, I gave a list of the most common HTML tags used for formatting text.
  * There are a lot of other HTML tags more information about you can find here https://www.w3schools.com/tags/ref_byfunc.asp
  ***********************************************************/
@@ -262,6 +262,10 @@ var open_instruct_text_VVR1 =
 "<p>Get all the snacks that you want!</p><br>" +
 "<p>Press any key to begin.</p>";
 var close_instruct_text_VVR1 = "Thank you for your input. Proceeding to the next stage.";
+
+var popup_machine_VVR1 = true;
+var popup_duration_machine_VVR1 = 5; // (seconds)
+var popup_text_machine_VVR1 = 'Don’t forget, you can tip the machine any time in this stage to earn snacks.';
 /************************************************************
  * Contingency degradation [VVR_2]
  ************************************************************/
@@ -279,6 +283,10 @@ var open_instruct_text_VVR2 =
 "<p>Press any key to begin.</p>";
 var close_instruct_text_VVR2 = "Thank you for your input. Proceeding to the next stage.";
 
+var popup_machine_VVR2 = true;
+var popup_duration_machine_VVR2 = 10; //(seconds)
+var popup_text_machine_VVR2 = "Don’t forget, you can tip the machine any time in this stage to earn snacks.";
+
 /************************************************************
  * Contingency restoration [VVR_3]
  ************************************************************/
@@ -295,6 +303,10 @@ var open_instruct_text_VVR3 =
 "<p>Get all the snacks that you want!</p><br>" +
 "<p>Press any key to begin.</p>";
 var close_instruct_text_VVR3 = "Thank you for your input. Proceeding to the next stage.";
+
+var popup_machine_VVR3 = true;
+var popup_duration_machine_VVR3 = 10; //(seconds)
+var popup_text_machine_VVR3 = "Don’t forget, you can tip the machine any time in this stage to earn snacks.";
 
 /************************************************************
  * Transfer Test
@@ -314,6 +326,10 @@ var open_instruct_text_transfer_test =  "<p>The vending machine is still overflo
 "<p>Get all the snacks that you want!</p><br>" +
 "<p>Press any key to begin. </p>";
 var close_instruct_text_transfer_test = "Close Instruction Transfer Test";
+
+var popup_machine_transfer1 = true;
+var popup_duration_machine_transfer1 = 15; // (seconds)
+var popup_text_machine_transfer1 = "You can tip the machine any time in this stage. Any snacks you earn will be recorded.";
 
 /************************************************************
  * Deval Video
@@ -345,6 +361,10 @@ var open_instruct_text_deval_test =  "<p>The vending machine is still overflowin
 "<p>Get all the snacks that you want!</p><br>" +
 "<p>Press any key to begin. </p>";
 var close_instruct_text_deval_test = "Close Instruction Deval Test";
+
+var popup_machine_deval_test = true;
+var popup_duration_machine_deval_test = 5; // (seconds)
+var popup_text_machine_deval_test = 'You can tip the machine any time in this stage. Any snacks you earn will be recorded.';
 
 /************************************************************
  * Recall(memory test)
