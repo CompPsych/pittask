@@ -97,6 +97,7 @@ jsPsych.plugins["transfer-test"] = (function() {
 
     // number of repeats
     var reps_counter = 0;
+    var block_number;
     var timestamp_onload = jsPsych.totalTime();
     var latestSavedColor = 'blank'
 
@@ -197,6 +198,7 @@ jsPsych.plugins["transfer-test"] = (function() {
             event_type: "image appears",
             event_raw_details: color_name + " vending machine",
             event_converted_details: color_name + " vending machine appears",
+            block_number: block_number,
             timestamp: jsPsych.totalTime(),
             time_elapsed: jsPsych.totalTime() - timestamp_onload,
           });
@@ -206,6 +208,7 @@ jsPsych.plugins["transfer-test"] = (function() {
           setTimeout(update_color, duration);
         } else {
           reps_counter++;
+          block_number++;
 
           if (trial.sequence_reps !== reps_counter) {
             change_colors();
@@ -218,6 +221,7 @@ jsPsych.plugins["transfer-test"] = (function() {
 
     // used to determine relevantly stage
     if(trial.stage_name !== 'deval_test') {
+      block_number = 1;
       change_colors();
     } else if (trial.stage_name === 'deval_test') {
       devalTestDuration = trial.trial_duration
@@ -281,6 +285,7 @@ jsPsych.plugins["transfer-test"] = (function() {
                 event_type: "left tilt",
                 event_raw_details: shake_left_translateX + "%, " + shake_left_rotate + "deg",
                 event_converted_details: "vending machine was tilted left " + shake_left_translateX + "%, " + shake_left_rotate + "deg",
+                block_number: block_number,
                 timestamp: jsPsych.totalTime(),
                 time_elapsed: jsPsych.totalTime() - timestamp_onload
               });
@@ -299,6 +304,7 @@ jsPsych.plugins["transfer-test"] = (function() {
                 event_type: "right tilt",
                 event_raw_details: shake_right_translateX + "%, " + shake_right_rotate + "deg",
                 event_converted_details: "vending machine was tilted right " + shake_right_translateX + "%, " + shake_right_rotate + "deg",
+                block_number: block_number,
                 timestamp: jsPsych.totalTime(),
                 time_elapsed: jsPsych.totalTime() - timestamp_onload
               });
@@ -311,6 +317,7 @@ jsPsych.plugins["transfer-test"] = (function() {
           event_type: "key press",
           event_raw_details: info.key,
           event_converted_details: jsPsych.pluginAPI.convertKeyCodeToKeyCharacter(info.key) + " key pressed",
+          block_number: block_number,
           timestamp: jsPsych.totalTime(),
           time_elapsed: jsPsych.totalTime() - timestamp_onload
         });
@@ -323,6 +330,7 @@ jsPsych.plugins["transfer-test"] = (function() {
             event_type: "key release",
             event_raw_details: info.key_release,
             event_converted_details: jsPsych.pluginAPI.convertKeyCodeToKeyCharacter(info.key_release) + " key released",
+            block_number: block_number,
             timestamp: jsPsych.totalTime(),
             time_elapsed: jsPsych.totalTime() - timestamp_onload
           });
@@ -390,7 +398,8 @@ jsPsych.plugins["transfer-test"] = (function() {
         response.trial_events.push({
           "event_type": 'error message',
           "event_raw_details": 'Error message',
-          "event_converted": 'popup triggered popup_duration_machine',
+          "event_converted_details": 'popup triggered popup_duration_machine',
+          block_number: block_number,
           "timestamp": jsPsych.totalTime(),
           "time_elapsed": jsPsych.totalTime() - timestamp_onload
         });
@@ -400,6 +409,7 @@ jsPsych.plugins["transfer-test"] = (function() {
           "event_type": 'popup closed',
           "event_raw_details": 'Close',
           "event_converted_details": latestSavedColor +  ' vending machine appears',
+          block_number: block_number,
           "timestamp": jsPsych.totalTime(),
           "time_elapsed": jsPsych.totalTime() - timestamp_onload
         });

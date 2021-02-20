@@ -1377,7 +1377,10 @@ if(isClass(query))
               PIN, complete, format(as.IDate(formatDateTime(time_ms + events$timestamp[e])), "%d-%m-%Y"),
               as.character(as.ITime(formatDateTime(time_ms + events$timestamp[e]))),
               ifelse(is.na(events$timestamp[e]), 'NA', events$timestamp[e]),
-              country, timezone, stage_name, commit, version, block_number,
+              country, timezone, stage_name, commit, version,
+              ifelse(stage_name != "transfer1" && stage_name != "transfer2" && stage_name != "transfer3", block_number, 
+                ifelse(!is.na(events$block_number[e]), events$block_number[e], 'NA')
+              ),
               ifelse(!is.null(events$interval_number[e]), events$interval_number[e], 'NA'),
               events$event_type[e],
               ifelse(is.null(events$event_raw_details[e]), NA, events$event_raw_details[e]),
