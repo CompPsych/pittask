@@ -652,10 +652,13 @@ if(isClass(query))
       time_ms <- dateTime_ms[ocir_index] - time_elapsed
       
       for(j in 1:length(ocir_responses)){
+        timestamp <- ifelse(is.na(names(ocir_timestamps)[j]), 'NA', ocir_timestamps[[j]])
+        if(is.na(names(ocir_timestamps)[j])) timestamp <- names(ocir_timestamps)[j]
+
         OCI_R <- rbindlist(list(OCI_R, list(
           PIN, complete, date,
-          as.character(as.ITime(formatDateTime(time_ms + as.numeric(ocir_timestamps[[j]])))),
-          ocir_timestamps[[j]],
+          as.character(as.ITime(formatDateTime(time_ms + as.numeric(timestamp)))),
+          timestamp,
           country, commit, version,
           names(ocir_responses)[j],
           ocir_responses[[j]]
@@ -1072,10 +1075,13 @@ if(isClass(query))
       time_ms <- dateTime_ms[isi_index] - time_elapsed
 
       for(j in 1:length(isi_responses)){
+        timestamp <- ifelse(is.na(names(isi_timestamps)[j]), 'NA', isi_timestamps[[j]])
+        if(is.na(names(isi_timestamps)[j])) timestamp <- names(isi_timestamps)[j]
+
         ISI <- rbindlist(list(ISI, list(
           PIN, complete, date,
-          as.character(as.ITime(formatDateTime(time_ms + as.numeric(isi_timestamps[[j]])))),
-          isi_timestamps[[j]],
+          as.character(as.ITime(formatDateTime(time_ms + as.numeric(timestamp)))),
+          timestamp,
           country, commit, version,
           names(isi_responses)[j],
           isi_responses[[j]]
