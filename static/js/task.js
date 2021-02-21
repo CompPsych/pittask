@@ -155,8 +155,6 @@ resubmit = function() {
     });
 };
 
-var images = ['/static/images/BBQ.png', '/static/images/TT.png', '/static/images/MM.png', '/static/images/EMPTY.png', '/static/images/audit_image.jpg'];
-
 // demographics instructions before the stage
 var DEMOGRAPHICS_INSTRUCT_OPEN = {
     timeline: [{
@@ -1810,6 +1808,20 @@ var THANKS = {
     event_converted_details: "thanks text appears"
 };
 
+/************************************************************
+ * Preload required images, video.
+ ***********************************************************/
+var preload_images = ['/static/images/BBQ.png', '/static/images/TT.png', '/static/images/MM.png', '/static/images/EMPTY.png', '/static/images/audit_image.jpg'];
+var preload_video = [counter_balancing[0].video + '.mp4'];
+
+three_dimensional_rotate_new.forEach(element => {
+    preload_images.push('/static/images/ICAR/three-dimensional_rotate/' + element.img)  
+});
+
+matrix_reasoning_new.forEach(element => {
+    preload_images.push('/static/images/ICAR/matrix_reasoning/' + element.img)  
+});
+
 // timeline array holds all stages in a sequence
 var timeline = [];
 var symptom_inventories_random = jsPsych.randomization.shuffle(symptom_inventory);
@@ -1879,7 +1891,8 @@ timeline.push(THANKS)
 function startExperiment(){
     jsPsych.init({
             timeline: timeline,
-            preload_images: images,
+            preload_images: preload_images,
+            preload_video: preload_video,
             // on_finish: function(){
             //     // Debug mode, on_finish and on_data_update must be commented out in debug mode
             //     $(window).off("beforeunload");
