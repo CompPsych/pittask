@@ -865,10 +865,13 @@ if(isClass(query))
       time_ms <- dateTime_ms[asrm_index] - time_elapsed
 
       for(j in 1:length(asrm_responses)){
+
+        timestamp <- ifelse(is.na(names(asrm_timestamps)[j]), 'NA', asrm_timestamps[[j]])
+        
         ASRM <- rbindlist(list(ASRM, list(
           PIN, complete, date,
-          as.character(as.ITime(formatDateTime(time_ms + as.numeric(asrm_timestamps[[j]])))),
-          asrm_timestamps[[j]],
+          ifelse(timestamp == "NA", "NA", as.character(as.ITime(formatDateTime(time_ms + as.numeric(timestamp))))),
+          timestamp,
           country, commit, version,
           names(asrm_responses)[j],
           asrm_responses[[j]]
