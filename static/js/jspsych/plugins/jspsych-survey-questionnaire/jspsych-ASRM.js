@@ -96,6 +96,13 @@ jsPsych.plugins['ASRM'] = (function () {
     // store responses, events
     var response = {
         trial_events: [],
+        trial_timestamp: {
+          Q1: 0,
+          Q2: 0,
+          Q3: 0,
+          Q4: 0,
+          Q5: 0,
+        }
     };
 
     var timestamp_onload = jsPsych.totalTime();
@@ -187,8 +194,9 @@ jsPsych.plugins['ASRM'] = (function () {
 
         // add radio button container
         html += '<div id="' + option_id_name + '" class="jspsych-survey-multi-choice-option">';
-        html += '<label class="jspsych-survey-multi-choice-text jspsych-survey-highlight" data-time-stamp="Q' + (i+1) + '" data-question-number="Q' + (i+1) +'A' + (j+1) +'" for="' + input_id + '"><span style="padding-right: 1rem">' + j + '</span> ' + question.options[j] + '</label>';
-        html += '<input hidden type="radio" name="' + input_name + '" id="' + input_id + '" data-time-stamp="Q' + (i+1) + '" data-question-number="Q' + (i+1) +'A' + (j+1) +'" value="' + j + '" ' + required_attr + '></input>';
+        html += '<label class="jspsych-survey-multi-choice-text jspsych-survey-highlight" data-time-stamp="Q' + (i+1) + '" data-question-number="Q' + (i+1) +'A' + (j+1) +'" for="' + input_id + '"><span style="padding-right: 1rem">' + j + '</span> ' + question.options[j];
+        html += '<input hidden type="radio" name="' + input_name + '" id="' + input_id + '" data-time-stamp="Q' + (i+1) + '" data-question-number="Q' + (i+1) +'A' + (j+1) +'" value="' + j + '" ' + required_attr + ' />';
+        html += '</label>';
         html += '</div>';
       }
 
@@ -196,7 +204,7 @@ jsPsych.plugins['ASRM'] = (function () {
     }
 
     // add submit button
-    html += '<input type="submit" id="' + plugin_id_name + '-next" class="' + plugin_id_name + ' jspsych-btn"' + (trial.button_label ? ' value="' + trial.button_label + '"' : '') + '></input>';
+    html += '<input type="submit" id="' + plugin_id_name + '-next" class="' + plugin_id_name + ' jspsych-btn"' + (trial.button_label ? ' value="' + trial.button_label + '"' : '') + '>';
     html += '</form>';
 
     // add modal
@@ -236,7 +244,7 @@ jsPsych.plugins['ASRM'] = (function () {
         
         if(info.el) {
           if(info.el.dataset.timeStamp) {
-            trial.time_stamp[info.el.dataset.timeStamp] = jsPsych.totalTime();
+            response.trial_timestamp[info.el.dataset.timeStamp] = jsPsych.totalTime();
           }
           if(info.el.dataset.questionNumber) {
             response.trial_events.push({
@@ -265,17 +273,11 @@ jsPsych.plugins['ASRM'] = (function () {
       $(this).addClass('bg-primary');
     });
 
-    // forced click event fix for some laptops touchpad
-    $("label").on("click",function(){
-      var labelID = $(this).attr('for');
-      $("#" + labelID).prop('checked', true).trigger('click').trigger('change');
-    });
-
-    // save timestamp on input click
-    $("input[type=radio]").on("click change touchstart",function(){
-      var time_stamp_key = $(this).data('time-stamp'); 
+    // // save timestamp on input click
+    $("input[type=radio]").on("click",function(){
+      var time_stamp_key = $(this).data('time-stamp');
       if(time_stamp_key) {
-        trial.time_stamp[time_stamp_key] = jsPsych.totalTime();
+        response.trial_timestamp[time_stamp_key] = jsPsych.totalTime();
       };
     });
 
@@ -310,7 +312,7 @@ jsPsych.plugins['ASRM'] = (function () {
           name = match.attributes['data-name'].value;
         }
         obje[name] = val;
-        timestamp_data[name] = trial.time_stamp['Q' + id];
+        timestamp_data[name] = response.trial_timestamp['Q' + id];
         Object.assign(question_data, obje);
       }
       
@@ -326,7 +328,7 @@ jsPsych.plugins['ASRM'] = (function () {
           "stage_name": JSON.stringify(plugin.info.stage_name),
           "responses": JSON.stringify(question_data),
           "timestamp": JSON.stringify(timestamp_data),
-          "time_stamp": JSON.stringify(trial.time_stamp),
+          "time_stamp": JSON.stringify(response.trial_timestamp),
           "question_order": JSON.stringify(question_order),
           "events": JSON.stringify(response.trial_events)
         };
