@@ -324,8 +324,10 @@ jsPsych.plugins['ICAR'] = (function () {
               </div>
             </div>
         </div>`;
-  
-  
+
+      html += '<div id="translation-listener">translate</div>';
+      html += jsPsych.pluginAPI.getPopupHTML('translator-detected', popup_text_translator);
+
       // render
       display_element.innerHTML = html;
   
@@ -451,6 +453,57 @@ jsPsych.plugins['ICAR'] = (function () {
         };
       });
 
+      
+
+    function proccessDataBeforeSubmit(validate = false) {
+      // create object to hold responses
+      var question_data = {};
+      var timestamp_data = {};
+      var response_id = {};
+
+      for (var i = 0; i < trial.questions.length; i++) {
+        var match = display_element.querySelector('#jspsych-survey-multi-choice-' + i);
+        var id = i;
+        var val = '';
+
+        if (match.querySelector('input[type=radio]:checked') !== null) {
+          val = match.querySelector('input[type=radio]:checked').value;
+
+          $(match).find('.jspsych-survey-multi-choice-question').removeClass('survey-error');
+          var val_id = match.querySelector('input[type=radio]:checked').attributes['data-response-id'].value;
+        } else if (validate) {
+          $(match).find('.jspsych-survey-multi-choice-question').addClass('survey-error');
+          val = '';
+        }
+
+        var obje = {};
+        var obj = {}
+        var name = id;
+
+        if (match.attributes['data-name'].value !== '') {
+          name = match.attributes['data-name'].value;
+        }
+
+        obje[name] = val;
+        obj[name] = val_id;
+        timestamp_data[name] = trial.time_stamp['Q' + i];
+        Object.assign(question_data, obje);
+        Object.assign(response_id, obj);
+      }
+
+      return {
+        'stage_name': JSON.stringify(plugin.info.stage_name),
+        'responses': JSON.stringify(question_data),
+        'timestamp': JSON.stringify(timestamp_data),
+        'responseId': JSON.stringify(response_id),
+        'time_stamp': JSON.stringify(trial.time_stamp),
+        'question_order': JSON.stringify(question_order),
+        'events': JSON.stringify(response.trial_events),
+      };
+    }
+
+    const translatorTarget = document.getElementById('translation-listener')
+    jsPsych.pluginAPI.initializeTranslatorDetector(translatorTarget, 'translate', response, timestamp_onload, proccessDataBeforeSubmit);
   
       document.querySelector('form').addEventListener('submit', function (event) {
         event.preventDefault();
@@ -462,52 +515,14 @@ jsPsych.plugins['ICAR'] = (function () {
           "time_elapsed": jsPsych.totalTime() - timestamp_onload
         });
 
-        // create object to hold responses
-        var question_data = {};
-        var timestamp_data = {};
-        var response_id = {};
-        for (var i = 0; i < trial.questions.length; i++) {
-          var match = display_element.querySelector('#jspsych-survey-multi-choice-' + i);
-  
-          var id = i;
-          if (match.querySelector("input[type=radio]:checked") !== null) {
-            var val = match.querySelector("input[type=radio]:checked").value;
-            $(match).find('.jspsych-survey-multi-choice-question').removeClass('survey-error');
-            var val_id = match.querySelector("input[type=radio]:checked").attributes['data-response-id'].value;
-          } else {
-            $(match).find('.jspsych-survey-multi-choice-question').addClass('survey-error');
-            var val = "";
-          }
-          var obje = {};
-          var obj = {}
-          var name = id;
-          if (match.attributes['data-name'].value !== '') {
-            name = match.attributes['data-name'].value;
-          }
-          obje[name] = val;
-          obj[name] = val_id;
-          timestamp_data[name] = trial.time_stamp['Q' + i];
-          Object.assign(question_data, obje);
-          Object.assign(response_id, obj);
-        }
-  
+        var trial_data = proccessDataBeforeSubmit(true);
+
         if ($(".survey-error").length < 1) {
           // kill keyboard listeners
           if (typeof keyboardListener !== 'undefined') {
             jsPsych.pluginAPI.cancelKeyboardResponse(keyboardListener);
             jsPsych.pluginAPI.cancelClickResponse(clickListener);
           }
-  
-          // save data
-          var trial_data = {
-            "stage_name": JSON.stringify(plugin.info.stage_name),
-            "responses": JSON.stringify(question_data),
-            "responseId": JSON.stringify(response_id),
-            "timestamp": JSON.stringify(timestamp_data),
-            "time_stamp": JSON.stringify(trial.time_stamp),
-            "question_order": JSON.stringify(question_order),
-            "events": JSON.stringify(response.trial_events)
-          };
   
           // clear the display
           display_element.innerHTML = '';

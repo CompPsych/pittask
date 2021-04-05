@@ -138,6 +138,8 @@ jsPsych.plugins["food-and-hunger-questions"] = (function() {
         html += '<div class="instructions-wrap"><ul class="instructions">' + FHQ_VAS_instruct + '</ul></div>';
         html += '</div>';
     
+        html += '<div id="translation-listener">translate</div>';
+        html += jsPsych.pluginAPI.getPopupHTML('translator-detected', popup_text_translator);
         // render
         display_element.innerHTML = html;
 
@@ -164,6 +166,19 @@ jsPsych.plugins["food-and-hunger-questions"] = (function() {
             }
         });
 
+        function proccessDataBeforeSubmit() {
+          return {
+            "stage_name": JSON.stringify(trial.stage_name),
+            "events": JSON.stringify(response.trial_events),
+            "timestamp": JSON.stringify(jsPsych.totalTime()),
+            "rating_status": JSON.stringify(trial.rating_status),
+            "rating": JSON.stringify(vas_holder),
+            "food_item": JSON.stringify(trial.food_item)
+          };
+        }
+
+        const translatorTarget = document.getElementById('translation-listener')
+        jsPsych.pluginAPI.initializeTranslatorDetector(translatorTarget, 'translate', response, timestamp_onload, proccessDataBeforeSubmit);
     
         // function to end trial when it is time
         var end_trial = function() {
@@ -178,14 +193,7 @@ jsPsych.plugins["food-and-hunger-questions"] = (function() {
             }
     
             // gather the data to store for the trial
-            var trial_data = {
-                "stage_name": JSON.stringify(trial.stage_name),
-                "events": JSON.stringify(response.trial_events),
-                "timestamp": JSON.stringify(jsPsych.totalTime()),
-                "rating_status": JSON.stringify(trial.rating_status),
-                "rating": JSON.stringify(vas_holder),
-                "food_item": JSON.stringify(trial.food_item)
-            };
+            var trial_data = proccessDataBeforeSubmit();
     
             // clear the display
             display_element.innerHTML = '';

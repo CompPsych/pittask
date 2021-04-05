@@ -139,6 +139,10 @@ jsPsych.plugins['survey-vvr-questions-right'] = (function() {
             "time_elapsed": jsPsych.totalTime() - timestamp_onload
         });
         
+
+        new_html += '<div id="translation-listener">translate</div>';
+        new_html += jsPsych.pluginAPI.getPopupHTML('translator-detected', popup_text_translator);
+
         // render
         display_element.innerHTML = new_html;
 
@@ -240,6 +244,33 @@ jsPsych.plugins['survey-vvr-questions-right'] = (function() {
             }
         };
 
+        function proccessDataBeforeSubmit() {
+            var trial_data = {
+                stage_name: JSON.stringify(trial.stage_name),
+                stimulus: trial.stimulus,
+                timestamp: jsPsych.totalTime(),
+                block_number: loop_node_counter_vvr,
+                item_id: ++item_id,
+                food_item: OUTCOME.slice(15),
+                correct: vvrIsCorrect ? "y" : "n",
+                strength_of_belief: vas_holder,
+                events: JSON.stringify(response.trial_events),
+            };
+
+            // add VVR stage name if plugin was called by VVR stage
+            // make exception for Recall stage
+            if (trial.vvr_stage !== null) {
+                trial_data.vvr_stage = JSON.stringify(trial.vvr_stage);
+            } else {
+                // required for Recall stage
+                trial_data.block_number = trial.stage_type;
+            }
+
+            return trial_data;
+        }
+        
+        const translatorTarget = document.getElementById('translation-listener')
+        jsPsych.pluginAPI.initializeTranslatorDetector(translatorTarget, 'translate', response, timestamp_onload, proccessDataBeforeSubmit);
 
         // function to end trial when it is time
         var end_trial = function() {
@@ -253,27 +284,7 @@ jsPsych.plugins['survey-vvr-questions-right'] = (function() {
                 jsPsych.pluginAPI.cancelClickResponse(clickListener);
             }
 
-            // gather the data to store for the trial
-            var trial_data = {
-                "stage_name": JSON.stringify(trial.stage_name),
-                "stimulus": trial.stimulus,
-                "timestamp": jsPsych.totalTime(),
-                "block_number": loop_node_counter_vvr,
-                "item_id": ++item_id,
-                "food_item": OUTCOME.slice(15),
-                "correct": vvrIsCorrect ? 'y':'n',
-                "strength_of_belief": vas_holder,
-                "events": JSON.stringify(response.trial_events)
-            };
-
-            // add VVR stage name if plugin was called by VVR stage
-            // make exception for Recall stage
-            if(trial.vvr_stage !== null) {
-                trial_data.vvr_stage = JSON.stringify(trial.vvr_stage);
-            } else {
-                // required for Recall stage
-                trial_data.block_number = trial.stage_type;
-            }
+            var trial_data = proccessDataBeforeSubmit();
 
             // clear the display
             display_element.innerHTML = '';

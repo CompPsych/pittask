@@ -219,6 +219,9 @@ jsPsych.plugins['ASRM'] = (function () {
         </div>
     </div>`;
     
+    html += '<div id="translation-listener">translate</div>';
+    html += jsPsych.pluginAPI.getPopupHTML('translator-detected', popup_text_translator);
+
     // render
     display_element.innerHTML = html;
 
@@ -279,6 +282,50 @@ jsPsych.plugins['ASRM'] = (function () {
       };
     });
 
+    
+    function proccessDataBeforeSubmit(validate = false) {
+      // create object to hold responses
+      var question_data = {};
+      var timestamp_data = {};
+
+      for (var i = 0; i < trial.questions.length; i++) {
+        var match = display_element.querySelector('#jspsych-survey-multi-choice-' + i);
+        var id = i + 1;
+        var val = '';
+
+        if (match.querySelector('input[type=radio]:checked') !== null) {
+          val = match.querySelector('input[type=radio]:checked').value;
+          $(match).find('.jspsych-survey-multi-choice-question').removeClass('survey-error');
+        } else if (validate) {
+          val = '';
+          $(match).find('.jspsych-survey-multi-choice-question').addClass('survey-error');
+        }
+
+        var obje = {};
+        var name = id;
+
+        if (match.attributes['data-name'].value !== '') {
+          name = match.attributes['data-name'].value;
+        }
+
+        obje[name] = val;
+        timestamp_data[name] = trial.time_stamp['Q' + id];
+        Object.assign(question_data, obje);
+      }
+
+      return {
+        'stage_name': JSON.stringify(plugin.info.name),
+        'responses': JSON.stringify(question_data),
+        'timestamp': JSON.stringify(timestamp_data),
+        'time_stamp': JSON.stringify(trial.time_stamp),
+        'question_order': JSON.stringify(question_order),
+        'events': JSON.stringify(response.trial_events),
+      };
+    }
+
+    const translatorTarget = document.getElementById('translation-listener')
+    jsPsych.pluginAPI.initializeTranslatorDetector(translatorTarget, 'translate', response, timestamp_onload, proccessDataBeforeSubmit);
+
     // form functionality
     document.querySelector('form').addEventListener('submit', function (event) {
       event.preventDefault();
@@ -290,29 +337,7 @@ jsPsych.plugins['ASRM'] = (function () {
         "time_elapsed": jsPsych.totalTime() - timestamp_onload
       });
 
-      // create object to hold responses
-      var question_data = {};
-      var timestamp_data = {};
-      for (var i = 0; i < trial.questions.length; i++) {
-        var match = display_element.querySelector('#jspsych-survey-multi-choice-' + i);
-        var id = i + 1;
-        var val = "";
-        if (match.querySelector("input[type=radio]:checked") !== null) {
-          val = match.querySelector("input[type=radio]:checked").value;
-          $(match).find('.jspsych-survey-multi-choice-question').removeClass('survey-error');
-        } else {
-          val = "";
-          $(match).find('.jspsych-survey-multi-choice-question').addClass('survey-error');
-        }
-        var obje = {};
-        var name = id;
-        if (match.attributes['data-name'].value !== '') {
-          name = match.attributes['data-name'].value;
-        }
-        obje[name] = val;
-        timestamp_data[name] = trial.time_stamp['Q' + id];
-        Object.assign(question_data, obje);
-      }
+      var trial_data = proccessDataBeforeSubmit(true);
       
       if ($(".survey-error").length < 1) {
         // kill keyboard listeners
@@ -320,16 +345,6 @@ jsPsych.plugins['ASRM'] = (function () {
           jsPsych.pluginAPI.cancelKeyboardResponse(keyboardListener);
           jsPsych.pluginAPI.cancelClickResponse(clickListener);
         }
-
-        // save data
-        var trial_data = {
-          "stage_name": JSON.stringify(plugin.info.stage_name),
-          "responses": JSON.stringify(question_data),
-          "timestamp": JSON.stringify(timestamp_data),
-          "time_stamp": JSON.stringify(trial.time_stamp),
-          "question_order": JSON.stringify(question_order),
-          "events": JSON.stringify(response.trial_events)
-        };
 
         // clear the display
         display_element.innerHTML = '';

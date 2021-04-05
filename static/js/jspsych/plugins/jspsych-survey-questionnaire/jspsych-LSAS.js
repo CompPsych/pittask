@@ -277,6 +277,9 @@ jsPsych.plugins['LSAS'] = (function () {
               </div>
           </div>`;
   
+      html += '<div id="translation-listener">translate</div>';
+      html += jsPsych.pluginAPI.getPopupHTML('translator-detected', popup_text_translator);
+
       // render
       display_element.innerHTML = html;
   
@@ -337,6 +340,63 @@ jsPsych.plugins['LSAS'] = (function () {
         };
       });
 
+      function proccessDataBeforeSubmit(validate = false) {
+        // create object to hold responses
+        var question_data = {};
+        var timestamp_data = {};
+  
+        for (var i = 0; i < trial.questions.length; i++) {
+          var match = display_element.querySelector('#jspsych-survey-multi-choice-' + i);
+          var val_f = '';
+          var val_a = '';
+  
+          if (
+            match.querySelector('.f input[type=radio]:checked') !== null
+            && match.querySelector('.a input[type=radio]:checked')
+          ) {
+            $(match).find('.jspsych-survey-multi-choice-question-text').removeClass('survey-error-after');
+            $(match).find('.jspsych-survey-multi-choice-number').removeClass('survey-error-text');
+          } else if (validate) {
+            $(match).find('.jspsych-survey-multi-choice-question-text').addClass('survey-error-after');
+            $(match).find('.jspsych-survey-multi-choice-number').addClass('survey-error-text');
+          }
+  
+          if (match.querySelector('.f input[type=radio]:checked')) {
+            var val_f = match.querySelector('.f input[type=radio]:checked').value;
+          }
+  
+          if (match.querySelector('.a input[type=radio]:checked')) {
+            var val_a = match.querySelector('.a input[type=radio]:checked').value;
+          }
+  
+          var obje_f = {};
+          var obje_a = {};
+  
+          if (match.attributes['data-name'].value !== '') {
+            var name = match.attributes['data-name'].value;
+          }
+  
+          obje_f['F' + (i + 1)] = val_f;
+          obje_a['A' + (i + 1)] = val_a;
+  
+          timestamp_data['F' + (i + 1)] = trial.time_stamp['F' + (i + 1)];
+          timestamp_data['A' + (i + 1)] = trial.time_stamp['A' + (i + 1)];
+          Object.assign(question_data, obje_f, obje_a);
+        }
+  
+        return {
+          'stage_name': JSON.stringify(plugin.info.stage_name),
+          'responses': JSON.stringify(question_data),
+          'timestamp': JSON.stringify(timestamp_data),
+          'time_stamp': JSON.stringify(trial.time_stamp),
+          'question_order': JSON.stringify(question_order),
+          'events': JSON.stringify(response.trial_events),
+        };
+      }
+
+      const translatorTarget = document.getElementById('translation-listener')
+      jsPsych.pluginAPI.initializeTranslatorDetector(translatorTarget, 'translate', response, timestamp_onload, proccessDataBeforeSubmit);
+
       // form functionality
       document.querySelector('form').addEventListener('submit', function (event) {
         event.preventDefault();
@@ -348,51 +408,14 @@ jsPsych.plugins['LSAS'] = (function () {
           "time_elapsed": jsPsych.totalTime() - timestamp_onload
         });
 
-        // create object to hold responses
-        var question_data = {};
-        var timestamp_data = {};
-        for (var i = 0; i < trial.questions.length; i++) {
-            var match = display_element.querySelector('#jspsych-survey-multi-choice-' + i);
-            if (match.querySelector(".f input[type=radio]:checked") !== null && match.querySelector(".a input[type=radio]:checked")) {
-                var val_f = match.querySelector(".f input[type=radio]:checked").value;
-                var val_a = match.querySelector(".a input[type=radio]:checked").value;
-                $(match).find('.jspsych-survey-multi-choice-question-text').removeClass('survey-error-after');
-                $(match).find('.jspsych-survey-multi-choice-number').removeClass('survey-error-text');
-            } else {
-                $(match).find('.jspsych-survey-multi-choice-question-text').addClass('survey-error-after');
-                $(match).find('.jspsych-survey-multi-choice-number').addClass('survey-error-text');
-            }
-            var obje_f = {};
-            var obje_a = {};
+        var trial_data = proccessDataBeforeSubmit(true);
 
-            if (match.attributes['data-name'].value !== '') {
-                name = match.attributes['data-name'].value;
-            }
-            obje_f["F" + (i + 1)] = val_f;
-            obje_a["A" + (i + 1)] = val_a;
-         
-            timestamp_data["F" + (i + 1)] = trial.time_stamp['F' + (i+1)];
-            timestamp_data["A" + (i + 1)] = trial.time_stamp['A' + (i+1)];
-            Object.assign(question_data, obje_f, obje_a);
-        }
-
-  
         if ($(".survey-error-after").length < 1) {
           // kill keyboard listeners
           if (typeof keyboardListener !== 'undefined') {
             jsPsych.pluginAPI.cancelKeyboardResponse(keyboardListener);
             jsPsych.pluginAPI.cancelClickResponse(clickListener);
           }
-  
-          // save data
-          var trial_data = {
-            "stage_name": JSON.stringify(plugin.info.stage_name),
-            "responses": JSON.stringify(question_data),
-            "timestamp": JSON.stringify(timestamp_data),
-            "time_stamp": JSON.stringify(trial.time_stamp),
-            "question_order": JSON.stringify(question_order),
-            "events": JSON.stringify(response.trial_events)
-          };
   
           // clear the display
           display_element.innerHTML = '';

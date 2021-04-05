@@ -122,6 +122,9 @@ jsPsych.plugins['transfer-q'] = (function() {
       </div>
       </div>`;
 
+    html += '<div id="translation-listener">translate</div>';
+    html += jsPsych.pluginAPI.getPopupHTML('translator-detected', popup_text_translator);
+
     // render
     display_element.innerHTML = html;
 
@@ -197,6 +200,22 @@ jsPsych.plugins['transfer-q'] = (function() {
       }
     };
 
+    function proccessDataBeforeSubmit() {
+      var form_text_value = $(".text_box").val();
+      return {
+        stage_name: JSON.stringify(trial.stage_name),
+        stimulus: JSON.stringify(machine_color_name),
+        timestamp: response.transfer_a_timestamp,
+        events: JSON.stringify(response.trial_events),
+        item_id: JSON.stringify(item_id),
+        strength_of_belief: JSON.stringify(response.vas_response),
+        text: JSON.stringify(form_text_value),
+      };
+    }
+
+    const translatorTarget = document.getElementById('translation-listener')
+    jsPsych.pluginAPI.initializeTranslatorDetector(translatorTarget, 'translate', response, timestamp_onload, proccessDataBeforeSubmit);
+
     // form functionality
     document.querySelector("form").addEventListener("submit", function (event) {
       event.preventDefault();
@@ -208,9 +227,9 @@ jsPsych.plugins['transfer-q'] = (function() {
         time_elapsed: jsPsych.totalTime() - timestamp_onload,
       });
 
-      var form_text_value = $(".text_box").val();
+      var trial_data = proccessDataBeforeSubmit();
 
-      if (form_text_value.length >= transfer_q_text_limit) {
+      if (trial_data.text.length >= transfer_q_text_limit) {
         // kill keyboard listeners
         if (typeof keyboardListener !== "undefined") {
           jsPsych.pluginAPI.cancelKeyboardResponse(keyboardListener);

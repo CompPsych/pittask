@@ -33,6 +33,10 @@ var open_instruct_latency = 1500;
 var close_instruct_latency = 500;
 var popup_text_behav = "Please provide your answer prior to submission.";
 var popup_text_WBF = "Sorry, all questions need to be answered prior to submission.";
+var popup_translator = true;
+var popup_text_translator = "Please turn off the translation software otherwise you'll be banned from this HIT."
+var translator_detected_notif = true;
+var translator_detected_nofit_text = "The experiment has ended because you didn't turn the translator off."
 
 /************************************************************
 * ==================== WEB-BASED FORMS ====================
