@@ -1910,7 +1910,14 @@ function startExperiment(){
             on_data_update: function(data) {
                 psiTurk.recordTrialData(data);
                 psiTurk.saveData();
-			}
+			},
+            on_close: function(event) {
+                psiTurk.saveData();
+                $.ajax("quitter", {
+                    type: "POST",
+                    data: { uniqueId: uniqueId }
+                });
+            },
         }
     );
 

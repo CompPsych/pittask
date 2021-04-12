@@ -250,3 +250,13 @@ input[type=file]:focus, input[type=radio]:focus, input[type=checkbox]:focus {
 #jspsych-html-keyboard-response-stimulus {
   max-width: 550px;
 }
+
+#translation-listener {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  font-size: 0;
+  opacity: 0;
+} 

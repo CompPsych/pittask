@@ -41,6 +41,10 @@ jsPsych.plugins['parameters'] = (function(){
             feedback_duration: feedback_duration,
             popup_text_behav: popup_text_behav,
             popup_text_WBF: popup_text_WBF,
+            popup_translator: popup_translator,
+            popup_text_translator: popup_text_translator,
+            translator_detected_notif: translator_detected_notif,
+            translator_detected_nofit_text: translator_detected_nofit_text,
 
             shake_right_rotate: shake_right_rotate,
             shake_right_translateX: shake_right_translateX,

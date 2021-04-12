@@ -98,6 +98,8 @@ jsPsych.plugins["survey-feedback"] = (function() {
       new_html = '<div id="jspsych-survey-feedback" class="' + trial.id  +'">'+trial.stimulus+'</div>';
     }
 
+    new_html += '<div id="translation-listener">translate</div>';
+    new_html += jsPsych.pluginAPI.getPopupHTML('translator-detected', popup_text_translator)
 
     response.trial_events.push({
         event_type: trial.event_type,
@@ -109,6 +111,16 @@ jsPsych.plugins["survey-feedback"] = (function() {
 
     // render
     display_element.innerHTML = new_html;
+    
+    function proccessDataBeforeSubmit() {
+      return {
+        "stage_name": JSON.stringify(trial.stage_name),
+        "events": JSON.stringify(response.trial_events),
+      };
+    }
+    
+    const translatorTarget = document.getElementById('translation-listener')
+    jsPsych.pluginAPI.initializeTranslatorDetector(translatorTarget, 'translate', response, timestamp_onload, proccessDataBeforeSubmit);
 
     // function to end trial when it is time
     var end_trial = function() {
@@ -123,10 +135,7 @@ jsPsych.plugins["survey-feedback"] = (function() {
       }
 
       // gather the data to store for the trial
-      var trial_data = {
-          stage_name: JSON.stringify(trial.stage_name),
-          events: JSON.stringify(response.trial_events),
-      };
+      var trial_data = proccessDataBeforeSubmit();
 
       // clear the display
       display_element.innerHTML = '';

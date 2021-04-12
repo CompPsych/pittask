@@ -401,7 +401,7 @@ PavCondition <- data.table(
   timestamp = numeric(),
   location = character(),
   commit = character(),
-  version = character(),  
+  version = character(),
   Q = numeric(),
   response = character(),
   correct = character()
@@ -622,17 +622,19 @@ if(isClass(query))
       time_elapsed <- trialdata$time_elapsed[demographics_index]
       time_ms <- dateTime_ms[demographics_index] - time_elapsed
 
-      for(j in 1:length(demographics_responses)){
+      for(j in seq_along(demographics_responses)){
         timestamp <- ifelse(is.na(names(demographics_timestamps)[j]), 'NA', demographics_timestamps[[j]])
-        if(is.na(names(demographics_timestamps)[j])) timestamp <- names(demographics_timestamps)[j]
+        #if(is.na(names(demographics_timestamps)[j])) timestamp <- names(demographics_timestamps)[j]
+        calendar_time <- ifelse(timestamp == 'NA', 'NA', as.character(as.ITime(formatDateTime(
+            time_ms + as.numeric(if(timestamp != 'NA') timestamp)))))
+        response <- ifelse(nchar(demographics_responses[[j]]) == 0, 'NA', demographics_responses[[j]])
 
         Demographics <- rbindlist(list(Demographics, list(
           PIN, complete, date,
-          ifelse(timestamp == 'NA', 'NA', as.character(as.ITime(formatDateTime(
-            time_ms + as.numeric(if(timestamp != 'NA') timestamp))))),
+          calendar_time,
           timestamp, country, timezone, commit, version,
           names(demographics_responses)[j],
-          demographics_responses[[j]]
+          response
         )))
       }
     } 
@@ -651,17 +653,20 @@ if(isClass(query))
       time_elapsed <- trialdata$time_elapsed[ocir_index]
       time_ms <- dateTime_ms[ocir_index] - time_elapsed
       
-      for(j in 1:length(ocir_responses)){
+      for(j in seq_along(ocir_responses)){
         timestamp <- ifelse(is.na(names(ocir_timestamps)[j]), 'NA', ocir_timestamps[[j]])
-        if(is.na(names(ocir_timestamps)[j])) timestamp <- names(ocir_timestamps)[j]
+        #if(is.na(names(ocir_timestamps)[j])) timestamp <- names(ocir_timestamps)[j]
+        calendar_time <- ifelse(timestamp == 'NA', 'NA', as.character(as.ITime(formatDateTime(
+            time_ms + as.numeric(if(timestamp != 'NA') timestamp)))))
+        response <- ifelse(nchar(ocir_responses[[j]]) == 0, 'NA', ocir_responses[[j]])
 
         OCI_R <- rbindlist(list(OCI_R, list(
           PIN, complete, date,
-          as.character(as.ITime(formatDateTime(time_ms + as.numeric(timestamp)))),
+          calendar_time,
           timestamp,
           country, commit, version,
           names(ocir_responses)[j],
-          ocir_responses[[j]]
+          response
         )))
       }
     }
@@ -680,16 +685,19 @@ if(isClass(query))
       time_elapsed <- trialdata$time_elapsed[moves_index]
       time_ms <- dateTime_ms[moves_index] - time_elapsed
       
-      for(j in 1:length(moves_responses)){
+      for(j in seq_along(moves_responses)){
         timestamp <- ifelse(is.na(names(moves_timestamps)[j]), 'NA', moves_timestamps[[j]])
-        if(is.na(names(moves_timestamps)[j])) timestamp <- names(moves_timestamps)[j]
+        #if(is.na(names(moves_timestamps)[j])) timestamp <- names(moves_timestamps)[j]
+        calendar_time <- ifelse(timestamp == 'NA', 'NA', as.character(as.ITime(formatDateTime(
+            time_ms + as.numeric(if(timestamp != 'NA') timestamp)))))
+        response <- ifelse(nchar(moves_responses[[j]]) == 0, 'NA', moves_responses[[j]])
         
         MOVES <- rbindlist(list(MOVES, list(
           PIN, complete, date,
-          as.character(as.ITime(formatDateTime(time_ms + as.numeric(timestamp)))),
+          calendar_time,
           timestamp, country, commit, version,
           names(moves_responses)[j],
-          moves_responses[[j]]
+          response
         )))
       }
     }
@@ -708,14 +716,20 @@ if(isClass(query))
       time_elapsed <- trialdata$time_elapsed[dass_index]
       time_ms <- dateTime_ms[dass_index] - time_elapsed
       
-      for(j in 1:length(dass_responses)){
+      for(j in seq_along(dass_responses)){
+        timestamp <- ifelse(is.na(names(dass_timestamps)[j]), 'NA', dass_timestamps[[j]])
+        #if(is.na(names(dass_timestamps)[j])) timestamp <- names(dass_timestamps)[j]
+        calendar_time <- ifelse(timestamp == 'NA', 'NA', as.character(as.ITime(formatDateTime(
+            time_ms + as.numeric(if(timestamp != 'NA') timestamp)))))
+        response <- ifelse(nchar(dass_responses[[j]]) == 0, 'NA', dass_responses[[j]])
+
         DASS <- rbindlist(list(DASS, list(
           PIN, complete, date,
-          as.character(as.ITime(formatDateTime(time_ms + as.numeric(dass_timestamps[[j]])))),
-          dass_timestamps[[j]],
+          calendar_time,
+          timestamp,
           country, commit, version,
           names(dass_responses)[j],
-          dass_responses[[j]]
+          response
         )))
       }
     }
@@ -734,14 +748,20 @@ if(isClass(query))
       time_elapsed <- trialdata$time_elapsed[asrs5_index]
       time_ms <- dateTime_ms[asrs5_index] - time_elapsed
       
-      for(j in 1:length(asrs5_responses)){
+      for(j in seq_along(asrs5_responses)){
+        timestamp <- ifelse(is.na(names(asrs5_timestamps)[j]), 'NA', asrs5_timestamps[[j]])
+        #if(is.na(names(asrs5_timestamps)[j])) timestamp <- names(asrs5_timestamps)[j]
+        calendar_time <- ifelse(timestamp == 'NA', 'NA', as.character(as.ITime(formatDateTime(
+            time_ms + as.numeric(if(timestamp != 'NA') timestamp)))))
+        response <- ifelse(nchar(asrs5_responses[[j]]) == 0, 'NA', asrs5_responses[[j]])
+
         ASRS5 <- rbindlist(list(ASRS5, list(
           PIN, complete, date,
-          as.character(as.ITime(formatDateTime(time_ms + as.numeric(asrs5_timestamps[[j]])))),
-          asrs5_timestamps[[j]],
+          calendar_time,
+          timestamp,
           country, commit, version,
           names(asrs5_responses)[j],
-          asrs5_responses[[j]]
+          response
         )))
       }
     }
@@ -760,14 +780,20 @@ if(isClass(query))
       time_elapsed <- trialdata$time_elapsed[eat26_index]
       time_ms <- dateTime_ms[eat26_index] - time_elapsed
 
-      for(j in 1:length(eat26_responses)){
+      for(j in seq_along(eat26_responses)){
+        timestamp <- ifelse(is.na(names(eat26_timestamps)[j]), 'NA', eat26_timestamps[[j]])
+        #if(is.na(names(eat26_timestamps)[j])) timestamp <- names(eat26_timestamps)[j]
+        calendar_time <- ifelse(timestamp == 'NA', 'NA', as.character(as.ITime(formatDateTime(
+            time_ms + as.numeric(if(timestamp != 'NA') timestamp)))))
+        response <- ifelse(nchar(eat26_responses[[j]]) == 0, 'NA', eat26_responses[[j]])
+
         EAT_26 <- rbindlist(list(EAT_26, list(
           PIN, complete, date,
-          as.character(as.ITime(formatDateTime(time_ms + as.numeric(eat26_timestamps[[j]])))),
-          eat26_timestamps[[j]],
+          calendar_time,
+          timestamp,
           country, commit, version,
           names(eat26_responses)[j],
-          eat26_responses[[j]]
+          response
         )))
       }
     } 
@@ -786,14 +812,20 @@ if(isClass(query))
       date <- format(as.IDate(dateTime[raads14_index]), "%d-%m-%Y")
       time <- as.character(as.ITime(dateTime[raads14_index]))
       
-      for(j in 1:length(raads14_responses)){
+      for(j in seq_along(raads14_responses)){
+        timestamp <- ifelse(is.na(names(raads14_timestamps)[j]), 'NA', raads14_timestamps[[j]])
+        #if(is.na(names(raads14_timestamps)[j])) timestamp <- names(raads14_timestamps)[j]
+        calendar_time <- ifelse(timestamp == 'NA', 'NA', as.character(as.ITime(formatDateTime(
+            time_ms + as.numeric(if(timestamp != 'NA') timestamp)))))
+        response <- ifelse(nchar(raads14_responses[[j]]) == 0, 'NA', raads14_responses[[j]])
+
         RAADS_14 <- rbindlist(list(RAADS_14, list(
           PIN, complete, date,
-          as.character(as.ITime(formatDateTime(time_ms + as.numeric(raads14_timestamps[[j]])))),
-          raads14_timestamps[[j]],
+          calendar_time,
+          timestamp,
           country, commit, version,
           names(raads14_responses)[j],
-          raads14_responses[[j]]
+          response
         )))
       }
     } 
@@ -812,14 +844,20 @@ if(isClass(query))
       time_elapsed <- trialdata$time_elapsed[phq9_index]
       time_ms <- dateTime_ms[phq9_index] - time_elapsed
       
-      for(j in 1:length(phq9_responses)){
+      for(j in seq_along(phq9_responses)){
+        timestamp <- ifelse(is.na(names(phq9_timestamps)[j]), 'NA', phq9_timestamps[[j]])
+        #if(is.na(names(phq9_timestamps)[j])) timestamp <- names(phq9_timestamps)[j]
+        calendar_time <- ifelse(timestamp == 'NA', 'NA', as.character(as.ITime(formatDateTime(
+            time_ms + as.numeric(if(timestamp != 'NA') timestamp)))))
+        response <- ifelse(nchar(phq9_responses[[j]]) == 0, 'NA', phq9_responses[[j]])
+
         PHQ_9 <- rbindlist(list(PHQ_9, list(
           PIN, complete, date,
-          as.character(as.ITime(formatDateTime(time_ms + as.numeric(phq9_timestamps[[j]])))),
-          phq9_timestamps[[j]],
+          calendar_time,
+          timestamp,
           country, commit, version,
           names(phq9_responses)[j],
-          phq9_responses[[j]]
+          response
         )))
       }
     }
@@ -838,14 +876,20 @@ if(isClass(query))
       time_elapsed <- trialdata$time_elapsed[gad7_index]
       time_ms <- dateTime_ms[gad7_index] - time_elapsed
       
-      for(j in 1:length(gad7_responses)){
+      for(j in seq_along(gad7_responses)){
+        timestamp <- ifelse(is.na(names(gad7_timestamps)[j]), 'NA', gad7_timestamps[[j]])
+        #if(is.na(names(gad7_timestamps)[j])) timestamp <- names(gad7_timestamps)[j]
+        calendar_time <- ifelse(timestamp == 'NA', 'NA', as.character(as.ITime(formatDateTime(
+            time_ms + as.numeric(if(timestamp != 'NA') timestamp)))))
+        response <- ifelse(nchar(gad7_responses[[j]]) == 0, 'NA', gad7_responses[[j]])
+
         GAD_7 <- rbindlist(list(GAD_7, list(
           PIN, complete, date, 
-          as.character(as.ITime(formatDateTime(time_ms + as.numeric(gad7_timestamps[[j]])))),
-          gad7_timestamps[[j]],
+          calendar_time,
+          timestamp,
           country, commit, version,
           names(gad7_responses)[j],
-          gad7_responses[[j]]
+          response
         )))
       }
     }
@@ -864,17 +908,20 @@ if(isClass(query))
       time_elapsed <- trialdata$time_elapsed[asrm_index]
       time_ms <- dateTime_ms[asrm_index] - time_elapsed
 
-      for(j in 1:length(asrm_responses)){
-
+      for(j in seq_along(asrm_responses)){
         timestamp <- ifelse(is.na(names(asrm_timestamps)[j]), 'NA', asrm_timestamps[[j]])
-        
+        #if(is.na(names(asrm_timestamps)[j])) timestamp <- names(asrm_timestamps)[j]
+        calendar_time <- ifelse(timestamp == 'NA', 'NA', as.character(as.ITime(formatDateTime(
+            time_ms + as.numeric(if(timestamp != 'NA') timestamp)))))
+        response <- ifelse(nchar(asrm_responses[[j]]) == 0, 'NA', asrm_responses[[j]])
+
         ASRM <- rbindlist(list(ASRM, list(
           PIN, complete, date,
-          ifelse(timestamp == "NA", "NA", as.character(as.ITime(formatDateTime(time_ms + as.numeric(timestamp))))),
+          calendar_time,
           timestamp,
           country, commit, version,
           names(asrm_responses)[j],
-          asrm_responses[[j]]
+          response
         )))
       }
     }
@@ -893,15 +940,20 @@ if(isClass(query))
       time_elapsed <- trialdata$time_elapsed[pc_ptsd_5_index]
       time_ms <- dateTime_ms[pc_ptsd_5_index] - time_elapsed
       
-      for(j in 1:length(pc_ptsd_5_responses)){
+      for(j in seq_along(pc_ptsd_5_responses)){
+        timestamp <- ifelse(is.na(names(pc_ptsd_5_timestamps)[j]), 'NA', pc_ptsd_5_timestamps[[j]])
+        #if(is.na(names(pc_ptsd_5_timestamps)[j])) timestamp <- names(pc_ptsd_5_timestamps)[j]
+        calendar_time <- ifelse(timestamp == 'NA', 'NA', as.character(as.ITime(formatDateTime(
+            time_ms + as.numeric(if(timestamp != 'NA') timestamp)))))
+        response <- ifelse(nchar(pc_ptsd_5_responses[[j]]) == 0, 'NA', pc_ptsd_5_responses[[j]])
+
         PC_PTSD_5 <- rbindlist(list(PC_PTSD_5, list(
           PIN, complete, date,
-          ifelse(pc_ptsd_5_timestamps[[j]] == 'NA', 'NA', as.character(as.ITime(formatDateTime(
-            time_ms + as.numeric(if(pc_ptsd_5_timestamps[[j]] != 'NA') pc_ptsd_5_timestamps[[j]]))))), 
-          pc_ptsd_5_timestamps[[j]],
+          calendar_time, 
+          timestamp,
           country, commit, version,
           names(pc_ptsd_5_responses)[j],
-          pc_ptsd_5_responses[[j]]
+          response
         )))
       }
     }
@@ -920,14 +972,20 @@ if(isClass(query))
       time_elapsed <- trialdata$time_elapsed[prime_r_index]
       time_ms <- dateTime_ms[prime_r_index] - time_elapsed
 
-      for(j in 1:length(prime_r_responses)){
+      for(j in seq_along(prime_r_responses)){
+        timestamp <- ifelse(is.na(names(prime_r_timestamps)[j]), 'NA', prime_r_timestamps[[j]])
+        #if(is.na(names(prime_r_timestamps)[j])) timestamp <- names(prime_r_timestamps)[j]
+        calendar_time <- ifelse(timestamp == 'NA', 'NA', as.character(as.ITime(formatDateTime(
+            time_ms + as.numeric(if(timestamp != 'NA') timestamp)))))
+        response <- ifelse(nchar(prime_r_responses[[j]]) == 0, 'NA', prime_r_responses[[j]])
+
         PRIME_R <- rbindlist(list(PRIME_R, list(
           PIN, complete, date,
-          as.character(as.ITime(formatDateTime(time_ms + as.numeric(prime_r_timestamps[[j]])))),
-          prime_r_timestamps[[j]],
+          calendar_time,
+          timestamp,
           country, commit, version,
           names(prime_r_responses)[j],
-          prime_r_responses[[j]]
+          response
         )))
       }
     }
@@ -946,14 +1004,20 @@ if(isClass(query))
       time_elapsed <- trialdata$time_elapsed[audit_index]
       time_ms <- dateTime_ms[audit_index] - time_elapsed
 
-      for(j in 1:length(audit_responses)){
+      for(j in seq_along(audit_responses)){
+        timestamp <- ifelse(is.na(names(audit_index_timestamps)[j]), 'NA', audit_index_timestamps[[j]])
+        #if(is.na(names(audit_index_timestamps)[j])) timestamp <- names(audit_index_timestamps)[j]
+        calendar_time <- ifelse(timestamp == 'NA', 'NA', as.character(as.ITime(formatDateTime(
+            time_ms + as.numeric(if(timestamp != 'NA') timestamp)))))
+        response <- ifelse(nchar(audit_responses[[j]]) == 0, 'NA', audit_responses[[j]])
+
         AUDIT <- rbindlist(list(AUDIT, list(
           PIN, complete, date,
-          as.character(as.ITime(formatDateTime(time_ms + as.numeric(audit_index_timestamps[[j]])))),
-          audit_index_timestamps[[j]],
+          calendar_time,
+          timestamp,
           country, commit, version,
           names(audit_responses)[j],
-          audit_responses[[j]]
+          response
         )))
       }
     }
@@ -972,14 +1036,20 @@ if(isClass(query))
       time_elapsed <- trialdata$time_elapsed[pgsi_index]
       time_ms <- dateTime_ms[pgsi_index] - time_elapsed
 
-      for(j in 1:length(pgsi_responses)){
+      for(j in seq_along(pgsi_responses)){
+        timestamp <- ifelse(is.na(names(pgsi_timestamps)[j]), 'NA', pgsi_timestamps[[j]])
+        #if(is.na(names(pgsi_timestamps)[j])) timestamp <- names(pgsi_timestamps)[j]
+        calendar_time <- ifelse(timestamp == 'NA', 'NA', as.character(as.ITime(formatDateTime(
+            time_ms + as.numeric(if(timestamp != 'NA') timestamp)))))
+        response <- ifelse(nchar(pgsi_responses[[j]]) == 0, 'NA', pgsi_responses[[j]])
+
         PGSI <- rbindlist(list(PGSI, list(
           PIN, complete, date,
-          as.character(as.ITime(formatDateTime(time_ms + as.numeric(pgsi_timestamps[[j]])))),
-          pgsi_timestamps[[j]],
+          calendar_time,
+          timestamp,
           country, commit, version,
           names(pgsi_responses)[j],
-          pgsi_responses[[j]]
+          response
         )))
       }
     }
@@ -998,14 +1068,20 @@ if(isClass(query))
       time_elapsed <- trialdata$time_elapsed[yiat_index]
       time_ms <- dateTime_ms[yiat_index] - time_elapsed
 
-      for(j in 1:length(yiat_responses)){
+      for(j in seq_along(yiat_responses)){
+        timestamp <- ifelse(is.na(names(yiat_timestamps)[j]), 'NA', yiat_timestamps[[j]])
+        #if(is.na(names(yiat_timestamps)[j])) timestamp <- names(yiat_timestamps)[j]
+        calendar_time <- ifelse(timestamp == 'NA', 'NA', as.character(as.ITime(formatDateTime(
+            time_ms + as.numeric(if(timestamp != 'NA') timestamp)))))
+        response <- ifelse(nchar(yiat_responses[[j]]) == 0, 'NA', yiat_responses[[j]])
+
         YIAT <- rbindlist(list(YIAT, list(
           PIN, complete, date,
-          as.character(as.ITime(formatDateTime(time_ms + as.numeric(yiat_timestamps[[j]])))),
-          yiat_timestamps[[j]],
+          calendar_time,
+          timestamp,
           country, commit, version,
           names(yiat_responses)[j],
-          yiat_responses[[j]]
+          response
         )))
       }
     }
@@ -1024,14 +1100,20 @@ if(isClass(query))
       time_elapsed <- trialdata$time_elapsed[SmokingStatus_index]
       time_ms <- dateTime_ms[SmokingStatus_index] - time_elapsed
 
-      for(j in 1:length(SmokingStatus_responses)){
+      for(j in seq_along(SmokingStatus_responses)){
+        timestamp <- ifelse(is.na(names(SmokingStatus_timestamps)[j]), 'NA', SmokingStatus_timestamps[[j]])
+        #if(is.na(names(SmokingStatus_timestamps)[j])) timestamp <- names(SmokingStatus_timestamps)[j]
+        calendar_time <- ifelse(timestamp == 'NA', 'NA', as.character(as.ITime(formatDateTime(
+            time_ms + as.numeric(if(timestamp != 'NA') timestamp)))))
+        response <- ifelse(nchar(SmokingStatus_responses[[j]]) == 0, 'NA', SmokingStatus_responses[[j]])
+
         SmokingStatus <- rbindlist(list(SmokingStatus, list(
           PIN, complete, date,
-          as.character(as.ITime(formatDateTime(time_ms + as.numeric(SmokingStatus_timestamps[[j]])))),
-          SmokingStatus_timestamps[[j]],
+          calendar_time,
+          timestamp,
           country, commit, version,
           names(SmokingStatus_responses)[j],
-          SmokingStatus_responses[[j]]
+          response
         )))
       }
     } 
@@ -1050,15 +1132,20 @@ if(isClass(query))
       time_elapsed <- trialdata$time_elapsed[ftnd_index]
       time_ms <- dateTime_ms[ftnd_index] - time_elapsed
 
-      for(j in 1:length(ftnd_responses)){
+      for(j in seq_along(ftnd_responses)){
+        timestamp <- ifelse(is.na(names(ftnd_timestamps)[j]), 'NA', ftnd_timestamps[[j]])
+        #if(is.na(names(ftnd_timestamps)[j])) timestamp <- names(ftnd_timestamps)[j]
+        calendar_time <- ifelse(timestamp == 'NA', 'NA', as.character(as.ITime(formatDateTime(
+            time_ms + as.numeric(if(timestamp != 'NA') timestamp)))))
+        response <- ifelse(nchar(ftnd_responses[[j]]) == 0, 'NA', ftnd_responses[[j]])
+
         FTND <- rbindlist(list(FTND, list(
           PIN, complete, date,
-          ifelse(ftnd_timestamps[[j]] == 'NA', 'NA', as.character(as.ITime(formatDateTime(
-            time_ms + as.numeric(if(ftnd_timestamps[[j]] != 'NA') ftnd_timestamps[[j]]))))), 
-          ftnd_timestamps[[j]],
+          calendar_time, 
+          timestamp,
           country, commit, version,
           names(ftnd_responses)[j],
-          ftnd_responses[[j]]
+          response
         )))
       }
     } 
@@ -1077,17 +1164,20 @@ if(isClass(query))
       time_elapsed <- trialdata$time_elapsed[isi_index]
       time_ms <- dateTime_ms[isi_index] - time_elapsed
 
-      for(j in 1:length(isi_responses)){
+      for(j in seq_along(isi_responses)){
         timestamp <- ifelse(is.na(names(isi_timestamps)[j]), 'NA', isi_timestamps[[j]])
-        if(is.na(names(isi_timestamps)[j])) timestamp <- names(isi_timestamps)[j]
+        #if(is.na(names(isi_timestamps)[j])) timestamp <- names(isi_timestamps)[j]
+        calendar_time <- ifelse(timestamp == 'NA', 'NA', as.character(as.ITime(formatDateTime(
+            time_ms + as.numeric(if(timestamp != 'NA') timestamp)))))
+        response <- ifelse(nchar(isi_responses[[j]]) == 0, 'NA', isi_responses[[j]])
 
         ISI <- rbindlist(list(ISI, list(
           PIN, complete, date,
-          as.character(as.ITime(formatDateTime(time_ms + as.numeric(timestamp)))),
+          calendar_time,
           timestamp,
           country, commit, version,
           names(isi_responses)[j],
-          isi_responses[[j]]
+          response
         )))
       }
     } 
@@ -1106,17 +1196,21 @@ if(isClass(query))
       time_elapsed <- trialdata$time_elapsed[pid5bf_index]
       time_ms <- dateTime_ms[pid5bf_index] - time_elapsed
 
-      for(j in 1:length(pid5bf_responses)){
+      for(j in seq_along(pid5bf_responses)){
         timestamp <- ifelse(is.na(names(pid5bf_timestamps)[j]), 'NA', pid5bf_timestamps[[j]])
+        #if(is.na(names(pid5bf_timestamps)[j])) timestamp <- names(pid5bf_timestamps)[j]
+        calendar_time <- ifelse(timestamp == 'NA', 'NA', as.character(as.ITime(formatDateTime(
+            time_ms + as.numeric(if(timestamp != 'NA') timestamp)))))
+        response <- ifelse(nchar(pid5bf_responses[[j]]) == 0, 'NA', pid5bf_responses[[j]])
+
         PID_5_BF <- rbindlist(list(PID_5_BF, list(
           PIN, complete, date,
-          # as.character(as.ITime(formatDateTime(time_ms + as.numeric(pid5bf_timestamps[[j]])))),
-          as.character(as.ITime(formatDateTime(time_ms + as.numeric(timestamp)))),
+          calendar_time,
           timestamp,
           country, commit, version,
           names(pid5bf_responses)[j],
-          pid5bf_responses[[j]]
-        )), fill=TRUE)
+          response
+        )))
       }
     } 
     
@@ -1134,14 +1228,20 @@ if(isClass(query))
       time_elapsed <- trialdata$time_elapsed[lsas_index]
       time_ms <- dateTime_ms[lsas_index] - time_elapsed
      
-      for(j in 1:length(lsas_responses)){
+      for(j in seq_along(lsas_responses)){
+        timestamp <- ifelse(is.na(names(lsas_timestamps)[j]), 'NA', lsas_timestamps[[j]])
+        #if(is.na(names(lsas_timestamps)[j])) timestamp <- names(lsas_timestamps)[j]
+        calendar_time <- ifelse(timestamp == 'NA', 'NA', as.character(as.ITime(formatDateTime(
+            time_ms + as.numeric(if(timestamp != 'NA') timestamp)))))
+        response <- ifelse(nchar(lsas_responses[[j]]) == 0, 'NA', lsas_responses[[j]])
+
         LSAS <- rbindlist(list(LSAS, list(
           PIN, complete, date,
-          as.character(as.ITime(formatDateTime(time_ms + as.numeric(lsas_timestamps[[j]])))),
-          lsas_timestamps[[j]],
+          calendar_time,
+          timestamp,
           country, commit, version,
           names(lsas_responses)[j],
-          lsas_responses[[j]]
+          response
         )))
       }
     } 
@@ -1149,7 +1249,6 @@ if(isClass(query))
     # ICAR --------------------------------------------------------------------
 
     icar_index <- which(trialdata$stage_name %in% "\"ICAR\"")
-    
     if(length(icar_index) != 0){
       icar_responses <- fromJSON(trialdata[icar_index,]$responses)
       icar_timestamps <- fromJSON(trialdata[icar_index,]$timestamp)
@@ -1158,14 +1257,23 @@ if(isClass(query))
       date <- format(as.IDate(dateTime[icar_index]), "%d-%m-%Y")
       time <- as.character(as.ITime(dateTime[icar_index]))
       
-      for(j in 1:length(icar_responses)){
+      time_elapsed <- trialdata$time_elapsed[pid5bf_index]
+      time_ms <- dateTime_ms[pid5bf_index] - time_elapsed
+      
+      for(j in seq_along(icar_responses)){
+        timestamp <- ifelse(is.na(names(icar_timestamps)[j]), 'NA', icar_timestamps[[j]])
+        #if(is.na(names(icar_timestamps)[j])) timestamp <- names(icar_timestamps)[j]
+        calendar_time <- ifelse(timestamp == 'NA', 'NA', as.character(as.ITime(formatDateTime(
+            time_ms + as.numeric(if(timestamp != 'NA') timestamp)))))
+        response <- ifelse(nchar(icar_responses[[j]]) == 0, 'NA', icar_responses[[j]])
+
         ICAR <- rbindlist(list(ICAR, list(
           PIN, complete, date, time, 
-          icar_timestamps[[j]],
+          timestamp,
           country, commit, version,
           names(icar_responses)[j],
           icar_response_id[[j]],
-          icar_responses[[j]]
+          response
         )))
       }
     } 
@@ -1184,17 +1292,19 @@ if(isClass(query))
       time_elapsed <- trialdata$time_elapsed[sds_index]
       time_ms <- dateTime_ms[sds_index] - time_elapsed
      
-      for(j in 1:length(sds_responses)){
+      for(j in seq_along(sds_responses)){
         timestamp <- ifelse(is.na(names(sds_timestamps)[j]), 'NA', sds_timestamps[[j]])
-        if(is.na(names(sds_timestamps)[j])) timestamp <- names(sds_timestamps)[j]
+        #if(is.na(names(sds_timestamps)[j])) timestamp <- names(sds_timestamps)[j]
+        calendar_time <- ifelse(timestamp == 'NA', 'NA', as.character(as.ITime(formatDateTime(
+            time_ms + as.numeric(if(timestamp != 'NA') timestamp)))))
+        response <- ifelse(nchar(sds_responses[[j]]) == 0, 'NA', sds_responses[[j]])
 
         SDS <- rbindlist(list(SDS, list(
           PIN, complete, date,
-          ifelse(timestamp == 'NA', 'NA', as.character(as.ITime(formatDateTime(
-            time_ms + as.numeric(if(timestamp != 'NA') timestamp))))),
+          calendar_time,
           timestamp, country, commit, version,
           names(sds_responses)[j],
-          sds_responses[[j]]
+          response
         )))
       }
     }
@@ -1204,7 +1314,7 @@ if(isClass(query))
 
     if(!is.null(vvr_stages)){
       
-      for(j in 1:length(vvr_stages)){
+      for(j in seq_along(vvr_stages)){
 
         date <- format(as.IDate(dateTime[j]), "%d-%m-%Y")
         time <- as.character(as.ITime(dateTime[j]))
@@ -1279,7 +1389,7 @@ if(isClass(query))
       date <- format(as.IDate(dateTime[consent_feedback_index]), "%d-%m-%Y")
       time <- as.character(as.ITime(dateTime[consent_feedback_index]))
 
-      for(j in 1:length(consent_feedback_responses)){
+      for(j in seq_along(consent_feedback_responses)){
         
         ConsentFeedback <- rbindlist(list(ConsentFeedback, list(
           PIN, complete, date, time, consent_feedback_timestamp[[j]], country,
@@ -1299,7 +1409,7 @@ if(isClass(query))
       pav_condition_responses <- trialdata[pav_condition_index,]$responses
       pav_condition_timestamp <- trialdata[pav_condition_index,]$timestamp
     
-      for(j in 1:length(pav_condition_responses)){
+      for(j in seq_along(pav_condition_responses)){
         events <- trialdata[pav_condition_index,]
         response_submitted <- fromJSON(events$response_submitted[j])
         correct <- events$correct[j]
@@ -1313,7 +1423,7 @@ if(isClass(query))
         )))
       }
     }
-    
+
     # Recall -----------------------------------------------------------------
 
     recall_index <- which(trialdata$stage_name %in% "\"recall\"")
@@ -1325,10 +1435,10 @@ if(isClass(query))
       strength_of_belief <- trialdata[recall_index,]$strength_of_belief
       recall_correct <- trialdata[recall_index,]$correct
 
-      for(j in 1:length(recall_block_number)){
+      for(j in seq_along(recall_block_number)){
         date <- format(as.IDate(dateTime[j]), "%d-%m-%Y")
         time <- as.character(as.ITime(dateTime[j]))
-
+        
         Recall <- rbindlist(list(Recall, list(
           PIN, complete, date, time, recall_timestamp[j], commit, version, country, 
           recall_block_number[j], j, 
@@ -1349,7 +1459,7 @@ if(isClass(query))
       transfer_q <- trialdata[transfer_q_index,]$stage_name
    
  
-      for(j in 1:length(transfer_q)){
+      for(j in seq_along(transfer_q)){
         date <- format(as.IDate(dateTime[j]), "%d-%m-%Y")
         time <- as.character(as.ITime(dateTime[j]))
       
@@ -1364,7 +1474,7 @@ if(isClass(query))
     # CompleteData ------------------------------------------------------------
     
     if(!is.null(trialdata$stage_name) & !is.null(version) & !is.null(trialdata$events)) {
-      for (j in 1:length(trialdata$events)) {
+      for (j in seq_along(trialdata$events)) {
         if (!is.na(trialdata$events[j]) & trialdata$events[j] != "[]") {
           date <- format(as.IDate(dateTime[j]), "%d-%m-%Y")
           time <- as.character(as.ITime(dateTime[j]))
@@ -1386,11 +1496,13 @@ if(isClass(query))
               PIN, complete, format(as.IDate(formatDateTime(time_ms + events$timestamp[e])), "%d-%m-%Y"),
               as.character(as.ITime(formatDateTime(time_ms + events$timestamp[e]))),
               ifelse(is.na(events$timestamp[e]), 'NA', events$timestamp[e]),
-              country, timezone, stage_name, commit, version,
-              ifelse(stage_name != "transfer1" && stage_name != "transfer2" && stage_name != "transfer3", block_number, 
+              country, timezone, stage_name, commit, version, 
+              ifelse(stage_name != "VOR" && stage_name != "transfer1" && stage_name != "transfer2" && stage_name != "transfer3", block_number, 
                 ifelse(!is.na(events$block_number[e]), events$block_number[e], 'NA')
               ),
-              ifelse(!is.null(events$interval_number[e]), events$interval_number[e], 'NA'),
+              ifelse(!is.null(events$interval_number[e]), 
+                ifelse(!is.na(events$interval_number[e]), events$interval_number[e], 'NA')
+              , 'NA'),
               events$event_type[e],
               ifelse(is.null(events$event_raw_details[e]), NA, events$event_raw_details[e]),
               events$event_converted_details[e]

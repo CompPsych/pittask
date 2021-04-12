@@ -104,6 +104,9 @@ jsPsych.plugins['survey-vvr'] = (function() {
         </div>
       </div>`;
 
+    new_html += '<div id="translation-listener">translate</div>';
+    new_html += jsPsych.pluginAPI.getPopupHTML('translator-detected', popup_text_translator);
+
     display_element.innerHTML = new_html;
 
     response.trial_events.push({
@@ -291,19 +294,16 @@ jsPsych.plugins['survey-vvr'] = (function() {
       }
     }
 
-    // function to end trial when it is time
-    var end_trial = function() {
-      // clear popup timer
-      clearTimeout(timer)
-
+    
+    function proccessDataBeforeSubmit() {
       // increase counter
       loop_node_counter_vvr++;
       loop_node_counter_vvr_determination++;
 
       if ((VVR_DEGRAD_PATTERN.length - 1) === degrad_pattern_loop_counter) {
-          degrad_pattern_loop_counter = 0;
+        degrad_pattern_loop_counter = 0;
       } else {
-          degrad_pattern_loop_counter++;
+        degrad_pattern_loop_counter++;
       }
 
       if ((VVR_PROB_VALUE.length - 1) === prob_value_loop_counter) {
@@ -311,6 +311,24 @@ jsPsych.plugins['survey-vvr'] = (function() {
       } else {
         prob_value_loop_counter++;
       }
+
+      return {
+        stage_name: trial.stage_name,
+        stimulus: trial.stimulus,
+        block_number: loop_node_counter_vvr,
+        events: JSON.stringify(response.trial_events),
+      };
+    }
+
+    const translatorTarget = document.getElementById('translation-listener')
+    jsPsych.pluginAPI.initializeTranslatorDetector(translatorTarget, 'translate', response, timestamp_onload, proccessDataBeforeSubmit);
+
+    // function to end trial when it is time
+    var end_trial = function() {
+      // clear popup timer
+      clearTimeout(timer)
+
+      var trial_data = proccessDataBeforeSubmit();
 
       // kill any remaining setTimeout handlers
       jsPsych.pluginAPI.clearAllTimeouts();
@@ -324,14 +342,6 @@ jsPsych.plugins['survey-vvr'] = (function() {
           jsPsych.pluginAPI.cancelKeyboardResponse(keyboardListener);
           jsPsych.pluginAPI.cancelClickResponse(clickListener);
       }
-
-      // gather the data to store for the trial
-      var trial_data = {
-        stage_name: trial.stage_name,
-        stimulus: trial.stimulus,
-        block_number: loop_node_counter_vvr,
-        events: JSON.stringify(response.trial_events),
-      };
 
       // clear the display
       display_element.innerHTML = '';

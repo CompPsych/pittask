@@ -107,6 +107,7 @@ jsPsych.plugins['Demographics'] = (function () {
         "time_elapsed": jsPsych.totalTime() - timestamp_onload
       });
   
+      html += '<div id="translation-listener">translate</div>';
       // inject CSS for trial
       html += '<style id="jspsych-survey-multi-choice-css">';
       html += ".jspsych-survey-multi-choice-question { display: flex; align-items: center; margin-top: .2em; margin-bottom: .2em; text-align: left;  }" +
@@ -425,6 +426,8 @@ jsPsych.plugins['Demographics'] = (function () {
               </div>
             </div>
         </div>`;
+
+      html += jsPsych.pluginAPI.getPopupHTML('translator-detected', popup_text_translator);
   
       // render
       display_element.innerHTML = html;
@@ -480,6 +483,211 @@ jsPsych.plugins['Demographics'] = (function () {
         };
       });
 
+      function proccessDataBeforeSubmit(validateInputs = false) {
+        // create object to hold responses
+        var question_data = {};
+        var timestamp_data = {};
+  
+        for (var i = 0; i < 1; i++) {
+          var match = display_element.querySelector('#jspsych-survey-multi-choice-' + i);
+          var id = $(match).find('.jspsych-survey-multi-choice-question').text();
+          var val = '';
+  
+          if (match.querySelector('input[type=radio]:checked') !== null) {
+            val = match.querySelector('input[type=radio]:checked').value;
+  
+            $(match).find('.jspsych-survey-multi-choice-question').removeClass('survey-error-after');
+          } else if (validateInputs) {
+            $(match).find('.jspsych-survey-multi-choice-question').addClass('survey-error-after');
+            val = '';
+          }
+  
+          var obje = {};
+          var name = id;
+  
+          if (match.attributes['data-name'].value !== '') {
+            name = match.attributes['data-name'].value;
+          }
+  
+          timestamp_data[name] = trial.time_stamp['Q' + (i + 1)];
+          obje[name] = val;
+          Object.assign(question_data, obje);
+        }
+  
+        // input age check
+        (function () {
+          var year_input_value = $('.input-year').val();
+          var label = $('#jspsych-survey-multi-choice-response-1-0').prop('labels');
+  
+          if (!validateInputs || (year_input_value !== '' && year_input_value >= 18 && year_input_value <= 100)) {
+            $('.jspsych-survey-multi-choice-question-age').removeClass('survey-error-after');
+            $('.moda__age-incomplete').remove();
+            $(label).removeClass('survey-error-after');
+  
+            var object2a = {
+              '2. Age (years)': $('input[name="2. Age (years)"]').val()
+            };
+  
+            timestamp_data['2. Age (years)'] = trial.time_stamp['Q2'];
+            Object.assign(question_data, object2a);
+          } else {
+            $('.jspsych-survey-multi-choice-question-age').addClass('survey-error-after');
+  
+            if (year_input_value !== '') {
+              $(label).addClass('survey-error-after');
+  
+              if (!$('.moda__age-incomplete').length) {
+                $('.modal__content').append('<p class="moda__age-incomplete">You have entered an age that falls outside the expected range. <br/> Please enter your age.</p>')
+              }
+            }
+          }
+        })();
+  
+        // input height check
+        (function () {
+          var height_input_value_cm = $('.jspsych-survey-multi-choice-radio-cm').val();
+          var height_input_value_feet = $('.jspsych-survey-multi-choice-radio-feet').val();
+          var height_input_value_inches = $('.jspsych-survey-multi-choice-radio-inches').val();
+          var height_radio_value = $('input[name="Height (units selected)"]:checked').val();
+          var label_cm = $('#jspsych-survey-multi-choice-response-2-0').prop('labels');
+          var label_feet = $('#jspsych-survey-multi-choice-response-2-1').prop('labels');
+          var label;
+  
+          var height_min, height_max;
+          var height_input_value = '';
+  
+          if (height_radio_value === 'cm') {
+            height_input_value = height_input_value_cm;
+            height_min = 100;
+            height_max = 250;
+            label = label_cm;
+          } else {
+            height_input_value = height_input_value_feet;
+            height_min = 3;
+            height_max = 8;
+            label = label_feet;
+          }
+  
+          if (!validateInputs || (height_input_value !== ''
+            && height_input_value >= height_min && height_input_value <= height_max
+            && !(height_input_value == 8 && height_input_value_inches >= 4))) {
+            $('.jspsych-survey-multi-choice-question-height').removeClass('survey-error-after');
+            $('.moda__height-incomplete').remove();
+            $(label).removeClass('survey-error-after');
+  
+            var object3a = {
+              '3a. Height (cm)': $("input[name='3a. Height (cm)']").val() ? $("input[name='3a. Height (cm)']").val() : 'NA'
+            };
+            var object3b = {
+              '3b. Height (feet)': $('input[name="3b. Height (feet)"]').val() ? $('input[name="3b. Height (feet)"]').val() : 'NA'
+            };
+            var object3c = {
+              '3c. Height (inches)': $('input[name="3c. Height (inches)"]').val() ? $('input[name="3c. Height (inches)"]').val() : 'NA'
+            };
+  
+            timestamp_data['3a. Height (cm)'] = $('input[name="3a. Height (cm)"]').val() ? trial.time_stamp['Q3'] : 'NA';
+            timestamp_data['3b. Height (feet)'] = $('input[name="3b. Height (feet)"]').val() ? trial.time_stamp['Q3'] : 'NA';
+            timestamp_data['3c. Height (inches)'] = $('input[name="3c. Height (inches)"]').val() ? trial.time_stamp['Q3'] : 'NA';
+            Object.assign(question_data, object3a, object3b, object3c);
+          } else {
+            $('.jspsych-survey-multi-choice-question-height').addClass('survey-error-after');
+            if (height_input_value !== '') {
+              $(label).addClass('survey-error-after');
+  
+              if (!$('.moda__height-incomplete').length) {
+                $('.modal__content').append('<p class="moda__height-incomplete">You have entered a height that falls outside the expected range. <br/> Please enter your height.</p>');
+              }
+            }
+          }
+        })();
+  
+        // input weight check
+        (function () {
+          var weight_input_value = $('.option-input-weight').val();
+          var weight_radio_value = $("input[name='weight']:checked").val();
+          var weight_min, weight_max;
+          var label_kg = $('#jspsych-survey-multi-choice-response-3-0').prop('labels');
+          var label_pounds = $('#jspsych-survey-multi-choice-response-3-1').prop('labels');
+          var label;
+  
+          if (weight_radio_value != 'kg') {
+            weight_min = 85;
+            weight_max = 440;
+            label = label_pounds;
+          } else {
+            weight_min = 40;
+            weight_max = 200;
+            label = label_kg;
+          }
+  
+          if (!validateInputs || (weight_input_value >= weight_min && weight_input_value <= weight_max)) {
+            $('.jspsych-survey-multi-choice-question-weight').removeClass('survey-error-after');
+            $('.moda__weight-incomplete').remove();
+            $(label).removeClass('survey-error-after');
+  
+            var object4a = {
+              '4a Weight(kg)': weight_radio_value === 'kg' ? $('input[name="4b. Weight"]').val() : 'NA'
+            };
+            var object4b = {
+              '4b Weight (lbs)': weight_radio_value === 'pounds' ? $('input[name="4b. Weight"]').val() : 'NA'
+            };
+  
+            Object.assign(timestamp_data, {
+              '4a Weight(kg)': weight_radio_value === 'kg' ? trial.time_stamp['Q4'] : 'NA',
+              '4b Weight (lbs)': weight_radio_value === 'pounds' ? trial.time_stamp['Q4'] : 'NA'
+            });
+            Object.assign(question_data, object4a, object4b);
+          } else {
+            $('.jspsych-survey-multi-choice-question-weight').addClass('survey-error-after');
+            if (weight_input_value !== '') {
+              $(label).addClass('survey-error-after');
+  
+              if (!$('.moda__weight-incomplete').length) {
+                $('.modal__content').append('<p class="moda__weight-incomplete">You have entered a weight that falls outside the expected range. <br/> Please enter your weight.</p>')
+              }
+            }
+          }
+        })();
+  
+        for (var i = 4; i < trial.questions.length; i++) {
+          var match = display_element.querySelector('#jspsych-survey-multi-choice-' + i);
+          var id = $(match).find('.jspsych-survey-multi-choice-question').text();
+          var val = '';
+  
+          if (match.querySelector('input[type=radio]:checked') !== null) {
+            val = match.querySelector('input[type=radio]:checked').value;
+  
+            $(match).find('.jspsych-survey-multi-choice-question').removeClass('survey-error-after');
+          } else if (validateInputs) {
+            $(match).find('.jspsych-survey-multi-choice-question').addClass('survey-error-after');
+            val = '';
+          }
+  
+          var obje = {};
+          var name = id;
+  
+          if (match.attributes['data-name'].value !== '') {
+            name = match.attributes['data-name'].value;
+          }
+  
+          timestamp_data[name] = trial.time_stamp['Q' + (i + 1)];
+          obje[name] = val;
+          Object.assign(question_data, obje);
+        }
+  
+        return {
+          'stage_name': JSON.stringify(plugin.info.stage_name),
+          'responses': JSON.stringify(question_data),
+          'timestamp': JSON.stringify(timestamp_data),
+          'time_stamp': JSON.stringify(trial.time_stamp),
+          'question_order': JSON.stringify(question_order),
+          'events': JSON.stringify(response.trial_events),
+        };
+      }
+
+      const translatorTarget = document.getElementById('translation-listener')
+      jsPsych.pluginAPI.initializeTranslatorDetector(translatorTarget, 'translate', response, timestamp_onload, proccessDataBeforeSubmit);
+
       // form functionality 
       document.querySelector('form').addEventListener('submit', function (event) {
         event.preventDefault();
@@ -491,183 +699,7 @@ jsPsych.plugins['Demographics'] = (function () {
           "time_elapsed": jsPsych.totalTime() - timestamp_onload
         });
   
-        // create object to hold responses
-        var question_data = {};
-        var timestamp_data = {};
-
-        for (var i = 0; i < 1; i++) {
-          var match = display_element.querySelector('#jspsych-survey-multi-choice-' + i);
-          var id = $(match).find('.jspsych-survey-multi-choice-question').text();
-
-          if (match.querySelector("input[type=radio]:checked") !== null) {
-            var val = match.querySelector("input[type=radio]:checked").value;
-            $(match).find('.jspsych-survey-multi-choice-question').removeClass('survey-error-after');
-          } else {
-            $(match).find('.jspsych-survey-multi-choice-question').addClass('survey-error-after');
-            var val = "";
-          }
-          var obje = {};
-          var name = id;
-          if (match.attributes['data-name'].value !== '') {
-            name = match.attributes['data-name'].value;
-          }
-          timestamp_data[name] = trial.time_stamp['Q' + (i+1)];
-          obje[name] = val;
-          Object.assign(question_data, obje);
-        }
-
-        // input age check
-        (function() {
-            var year_input_value = $('.input-year').val();
-            var label = $("#jspsych-survey-multi-choice-response-1-0").prop("labels")
-            if(year_input_value === '') {
-              $('.jspsych-survey-multi-choice-question-age').addClass('survey-error-after');
-            } else if (year_input_value >= 18 && year_input_value <= 100) {
-              $('.jspsych-survey-multi-choice-question-age').removeClass('survey-error-after');
-              $('.moda__age-incomplete').remove();
-              $(label).removeClass('survey-error-after');
-              var object2a = {
-                '2. Age (years)': $("input[name='2. Age (years)']").val()
-              };
-              timestamp_data['2. Age (years)'] = trial.time_stamp['Q2'];
-              Object.assign(question_data, object2a);
-            } else {
-              $('.jspsych-survey-multi-choice-question-age').addClass('survey-error-after');
-              $(label).addClass('survey-error-after');
-              if (!$(".moda__age-incomplete").length ) {
-                $('.modal__content').append('<p class="moda__age-incomplete">You have entered an age that falls outside the expected range. <br/> Please enter your age.</p>')
-              }
-            }
-
-        })();
-
-        // input height check
-        (function() {
-            var height_input_value_cm = $('.jspsych-survey-multi-choice-radio-cm').val();
-            var height_input_value_feet = $('.jspsych-survey-multi-choice-radio-feet').val();
-            var height_input_value_inches = $('.jspsych-survey-multi-choice-radio-inches').val();
-            var height_radio_value = $("input[name='Height (units selected)']:checked").val();
-            var label_cm = $("#jspsych-survey-multi-choice-response-2-0").prop("labels");
-            var label_feet = $("#jspsych-survey-multi-choice-response-2-1").prop("labels");
-            var label;
-
-            var height_min, height_max;
-            var height_input_value = '';
-
-            if(height_radio_value === 'cm') {
-              height_input_value = height_input_value_cm;
-              height_min = 100;
-              height_max = 250;
-              label = label_cm;
-            } else {
-              height_input_value = height_input_value_feet;
-              height_min = 3;
-              height_max = 8;
-              label = label_feet;
-            }
-          
-            if(height_input_value === '') {
-                $('.jspsych-survey-multi-choice-question-height').addClass('survey-error-after');
-            } else if (height_input_value >= height_min && height_input_value <= height_max) {
-                if(height_input_value == 8 && height_input_value_inches >= 4) {
-                  $('.jspsych-survey-multi-choice-question-height').addClass('survey-error-after');
-                  if (!$(".moda__height-incomplete").length ) {
-                    $('.modal__content').append('<p class="moda__height-incomplete">You have entered a height that falls outside the expected range. <br/> Please enter your height.</p>');
-                  }
-                } else {
-                  $('.jspsych-survey-multi-choice-question-height').removeClass('survey-error-after');
-                  $('.moda__height-incomplete').remove();
-                  $(label).removeClass('survey-error-after');
-                  var object3a = {
-                    '3a. Height (cm)': $("input[name='3a. Height (cm)']").val() ? $("input[name='3a. Height (cm)']").val() : 'NA'
-                  };
-                  var object3b = {
-                    '3b. Height (feet)': $("input[name='3b. Height (feet)']").val() ? $("input[name='3b. Height (feet)']").val() : 'NA'
-                  };
-                  var object3c = {
-                    '3c. Height (inches)': $("input[name='3c. Height (inches)']").val() ? $("input[name='3c. Height (inches)']").val() : 'NA'
-                  };
-                  timestamp_data['3a. Height (cm)'] =  $("input[name='3a. Height (cm)']").val() ? trial.time_stamp['Q3'] : 'NA';
-                  timestamp_data['3b. Height (feet)'] = $("input[name='3b. Height (feet)']").val() ? trial.time_stamp['Q3'] : 'NA';
-                  timestamp_data['3c. Height (inches)'] = $("input[name='3c. Height (inches)']").val() ? trial.time_stamp['Q3'] : 'NA';
-                  Object.assign(question_data, object3a, object3b, object3c);
-                }
-            } else {
-                $('.jspsych-survey-multi-choice-question-height').addClass('survey-error-after');
-                $(label).addClass('survey-error-after');
-                if (!$(".moda__height-incomplete").length ) {
-                  $('.modal__content').append('<p class="moda__height-incomplete">You have entered a height that falls outside the expected range. <br/> Please enter your height.</p>');
-                }
-            }
-        })();
-
-        // input weight check
-        (function() {
-          var weight_input_value = $('.option-input-weight').val();
-          var weight_radio_value = $("input[name='weight']:checked").val();
-          var weight_min, weight_max;
-          var label_kg = $("#jspsych-survey-multi-choice-response-3-0").prop("labels");
-          var label_pounds = $("#jspsych-survey-multi-choice-response-3-1").prop("labels");
-          var label;
-
-          if(weight_radio_value != 'kg') {
-            weight_min = 85;
-            weight_max = 440;
-            label = label_pounds;
-          } else {
-            weight_min = 40;
-            weight_max = 200;
-            label = label_kg;
-          }
-
-          if(weight_input_value === '') {
-            $('.jspsych-survey-multi-choice-question-weight').addClass('survey-error-after');
-          } else if (weight_input_value >= weight_min && weight_input_value <= weight_max) {
-            $('.jspsych-survey-multi-choice-question-weight').removeClass('survey-error-after');
-            $('.moda__weight-incomplete').remove();
-            $(label).removeClass('survey-error-after');
-            var object4a = {
-              '4a Weight(kg)': weight_radio_value === 'kg' ? $("input[name='4b. Weight']").val() : 'NA' 
-            }
-            var object4b = {
-              '4b Weight (lbs)': weight_radio_value === 'pounds' ? $("input[name='4b. Weight']").val() : 'NA'
-            }
-            Object.assign(timestamp_data, {
-              '4a Weight(kg)': weight_radio_value === 'kg' ? trial.time_stamp['Q4'] : 'NA',
-              '4b Weight (lbs)': weight_radio_value === 'pounds' ? trial.time_stamp['Q4'] : 'NA'
-            });
-            Object.assign(question_data, object4a, object4b);
-          } else {
-            $('.jspsych-survey-multi-choice-question-weight').addClass('survey-error-after');
-            $(label).addClass('survey-error-after');
-            if (!$(".moda__weight-incomplete").length ) {
-              $('.modal__content').append('<p class="moda__weight-incomplete">You have entered a weight that falls outside the expected range. <br/> Please enter your weight.</p>')
-            }
-          }
-        })();
-        
-
-        for (var i = 4; i < trial.questions.length; i++) {
-          var match = display_element.querySelector('#jspsych-survey-multi-choice-' + i);
-  
-          var id = $(match).find('.jspsych-survey-multi-choice-question').text();
-          if (match.querySelector("input[type=radio]:checked") !== null) {
-            var val = match.querySelector("input[type=radio]:checked").value;
-            $(match).find('.jspsych-survey-multi-choice-question').removeClass('survey-error-after');
-          } else {
-            $(match).find('.jspsych-survey-multi-choice-question').addClass('survey-error-after');
-            var val = "";
-  
-          }
-          var obje = {};
-          var name = id;
-          if (match.attributes['data-name'].value !== '') {
-            name = match.attributes['data-name'].value;
-          }
-          timestamp_data[name] = trial.time_stamp['Q' + (i+1)];
-          obje[name] = val;
-          Object.assign(question_data, obje);
-        }
+        const trial_data = proccessDataBeforeSubmit(true);
 
         if ($(".survey-error-after").length < 1) {
           // kill keyboard listeners
@@ -675,17 +707,6 @@ jsPsych.plugins['Demographics'] = (function () {
             jsPsych.pluginAPI.cancelKeyboardResponse(keyboardListener);
             jsPsych.pluginAPI.cancelClickResponse(clickListener);
           }
-  
-          // save data
-          var trial_data = {
-            "stage_name": JSON.stringify(plugin.info.stage_name),
-            "responses": JSON.stringify(question_data),
-            "timestamp": JSON.stringify(timestamp_data),
-            "time_stamp": JSON.stringify(trial.time_stamp),
-            "question_order": JSON.stringify(question_order),
-            "events": JSON.stringify(response.trial_events)
-          };
-  
           // clear the display
           display_element.innerHTML = '';
   
