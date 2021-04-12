@@ -1,4 +1,4 @@
-jsPsych.plugins['transfer-q'] = (function() {
+jsPsych.plugins['transfer-q'] = (function () {
   var plugin = {};
 
   plugin.info = {
@@ -19,7 +19,7 @@ jsPsych.plugins['transfer-q'] = (function() {
     }
   }
 
-  plugin.trial = function(display_element, trial) {
+  plugin.trial = function (display_element, trial) {
     // store response
     var response = {
       trial_events: [],
@@ -171,7 +171,7 @@ jsPsych.plugins['transfer-q'] = (function() {
           timestamp: jsPsych.totalTime(),
           time_elapsed: jsPsych.totalTime() - timestamp_onload,
         });
-    
+
       },
     });
 
@@ -235,17 +235,6 @@ jsPsych.plugins['transfer-q'] = (function() {
           jsPsych.pluginAPI.cancelKeyboardResponse(keyboardListener);
           jsPsych.pluginAPI.cancelClickResponse(clickListener);
         }
-
-        // save data
-        var trial_data = {
-          stage_name: JSON.stringify(trial.stage_name),
-          stimulus: JSON.stringify(machine_color_name),
-          timestamp: response.transfer_a_timestamp,
-          events: JSON.stringify(response.trial_events),
-          item_id: JSON.stringify(item_id),
-          strength_of_belief: JSON.stringify(response.vas_response),
-          text: JSON.stringify(form_text_value),
-        };
 
         // clear the display
         display_element.innerHTML = "";
