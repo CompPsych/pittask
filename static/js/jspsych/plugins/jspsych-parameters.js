@@ -1,4 +1,4 @@
-jsPsych.plugins['parameters'] = (function(){
+jsPsych.plugins['parameters'] = (function () {
 
     var plugin = {};
 
@@ -21,7 +21,7 @@ jsPsych.plugins['parameters'] = (function(){
     }
 
     // plugin for saving parameters from parameters.js
-    plugin.trial = function(display_element, trial){
+    plugin.trial = function (display_element, trial) {
         var parameters = {
             re_captcha: re_captcha,
             re_captcha_duration: re_captcha_duration,
@@ -188,6 +188,7 @@ jsPsych.plugins['parameters'] = (function(){
             open_instruct_transfer_q: open_instruct_transfer_q,
             close_instruct_transfer_q: close_instruct_transfer_q,
             open_instruct_text_transfer_q: open_instruct_text_transfer_q,
+            transfer_q_q1_stim1_colour: transfer_q_q1_stim1_colour,
             transfer_q_q2_stim1_colour: transfer_q_q2_stim1_colour,
             transfer_q_q3_stim1_colour: transfer_q_q3_stim1_colour,
             transfer_q_q1_stim2_colour: transfer_q_q1_stim2_colour,
@@ -239,16 +240,16 @@ jsPsych.plugins['parameters'] = (function(){
         };
 
         // copy symptom inventory array
-        symptom_inventory.forEach(function(element, index) {
-            if(element.type) {
+        symptom_inventory.forEach(function (element, index) {
+            if (element.type) {
                 index === 0 ? parameters['symptom_inventory'] += element.type : parameters['symptom_inventory'] += ', ' + element.type;
-            } else if(element.timeline) {
+            } else if (element.timeline) {
                 parameters['symptom_inventory'] += ', SMOKING STATUS';
             }
         });
 
         function array_extraction(arr, str) {
-            arr.forEach(function(element, index) {
+            arr.forEach(function (element, index) {
                 index === 0 ? parameters[str] += element : parameters[str] += ', ' + element;
             });
         };
