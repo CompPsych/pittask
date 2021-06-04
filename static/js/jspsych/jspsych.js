@@ -2080,7 +2080,9 @@ jsPsych.pluginAPI = (function () {
 
         parameters.callback_function({
           key: e.keyCode,
-          rt: key_time - start_time
+          rt: key_time - start_time,
+          el: e.target,
+          e: e
         });
 
         if (keyboard_listeners.includes(listener_id)) {
